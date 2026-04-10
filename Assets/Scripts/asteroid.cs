@@ -5,7 +5,7 @@ public class asteroid : MonoBehaviour
     public float speed = 5.0f; // Speed at which the asteroid moves downwards
     private Rigidbody rb;
     Vector3 screenBounds;
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -23,4 +23,11 @@ public class asteroid : MonoBehaviour
             Destroy(this.gameObject); // Destroy the asteroid
         }
     }
+
+    // i added this for the clickable asteroid- gives 10 credits (katy)
+    void OnMouseDown()
+{
+    GameManager.Instance.AddCredits(10);
+    Destroy(gameObject);
+}
 }
