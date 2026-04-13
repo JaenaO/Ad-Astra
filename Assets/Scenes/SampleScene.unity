@@ -632,6 +632,7 @@ GameObject:
   - component: {fileID: 541767645}
   - component: {fileID: 541767644}
   - component: {fileID: 541767643}
+  - component: {fileID: 541767646}
   m_Layer: 0
   m_Name: NearStars_Quad_B
   m_TagString: Untagged
@@ -733,6 +734,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 541767641}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &541767646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541767641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b6d0cae4ac3634fb1add6cd821e676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarFlicker
+  targetRenderer: {fileID: 0}
+  flickerSpeed: 5
+  minAlpha: 0.85
+  maxAlpha: 0.35
 --- !u!1 &669250482
 GameObject:
   m_ObjectHideFlags: 0
@@ -1023,6 +1040,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1181689574}
   - component: {fileID: 1181689575}
+  - component: {fileID: 1181689576}
   m_Layer: 0
   m_Name: NearStars
   m_TagString: Untagged
@@ -1061,6 +1079,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   speedMultiplier: 0.15
   asteroidSpeed: 10
+--- !u!114 &1181689576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181689573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b6d0cae4ac3634fb1add6cd821e676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarFlicker
+  targetRenderer: {fileID: 0}
+  flickerSpeed: 1.5
+  minAlpha: 0.65
+  maxAlpha: 1
 --- !u!1 &1198649026
 GameObject:
   m_ObjectHideFlags: 0
@@ -1299,6 +1333,7 @@ GameObject:
   - component: {fileID: 1329189765}
   - component: {fileID: 1329189764}
   - component: {fileID: 1329189763}
+  - component: {fileID: 1329189766}
   m_Layer: 0
   m_Name: MidStars_Quad
   m_TagString: Untagged
@@ -1400,6 +1435,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1329189761}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1329189766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329189761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b6d0cae4ac3634fb1add6cd821e676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarFlicker
+  targetRenderer: {fileID: 0}
+  flickerSpeed: 3
+  minAlpha: 1
+  maxAlpha: 0.35
 --- !u!1 &1363553843
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,6 +1463,7 @@ GameObject:
   - component: {fileID: 1363553847}
   - component: {fileID: 1363553846}
   - component: {fileID: 1363553845}
+  - component: {fileID: 1363553848}
   m_Layer: 0
   m_Name: NearStars_Quad
   m_TagString: Untagged
@@ -1513,6 +1565,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1363553843}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1363553848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1363553843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b6d0cae4ac3634fb1add6cd821e676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarFlicker
+  targetRenderer: {fileID: 0}
+  flickerSpeed: 5
+  minAlpha: 0.85
+  maxAlpha: 0.35
 --- !u!1 &1864079727
 GameObject:
   m_ObjectHideFlags: 0
@@ -1786,6 +1854,7 @@ GameObject:
   - component: {fileID: 2113538699}
   - component: {fileID: 2113538698}
   - component: {fileID: 2113538697}
+  - component: {fileID: 2113538700}
   m_Layer: 0
   m_Name: MidStars_Quad_B
   m_TagString: Untagged
@@ -1887,6 +1956,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2113538695}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2113538700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2113538695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b6d0cae4ac3634fb1add6cd821e676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarFlicker
+  targetRenderer: {fileID: 0}
+  flickerSpeed: 3
+  minAlpha: 1
+  maxAlpha: 0.35
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
