@@ -650,7 +650,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerManager
   asteroidPrefab: {fileID: 3873466983837974301, guid: 59adec5f64c764403a469afe9cfec01b, type: 3}
-  maxSpawnTime: 5
+  asteroidTypes:
+  - {fileID: 11400000, guid: 06e8e4675ef884ce9a1b4635bfe1cfa7, type: 2}
+  - {fileID: 11400000, guid: 580fa638689f9405db196f16e4e0ea13, type: 2}
+  - {fileID: 11400000, guid: ccbfafd00de6c4e14855eadcbd45a8e4, type: 2}
+  - {fileID: 11400000, guid: 8b7f9edc97f8746be94c08f1c68cf800, type: 2}
+  maxSpawnTime: 1
 --- !u!4 &669250484
 Transform:
   m_ObjectHideFlags: 0
