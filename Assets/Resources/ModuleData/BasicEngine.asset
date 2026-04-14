@@ -15,6 +15,6 @@ MonoBehaviour:
   id: BASIC_ENGINE
   displayName: Basic Engine
   moduleType: 3
-  prefab: {fileID: 0}
+  prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
   cost: 500
   weight: 5

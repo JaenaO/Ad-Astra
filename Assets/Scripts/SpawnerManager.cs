@@ -1,12 +1,19 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SpawnerManager : MonoBehaviour
 {
     public GameObject asteroidPrefab;
-    public AsteroidData[] asteroidTypes; // drag all 4 assets here
+    private AsteroidData[] asteroidTypes; // drag all 4 assets here
     public float maxSpawnTime = 5.0f;
     private Vector3 screenBounds;
+
+    private void Awake()
+    {
+        asteroidTypes = Resources.LoadAll<AsteroidData>("AsteroidData"); 
+    }
 
     void Start()
     {
