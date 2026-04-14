@@ -4,8 +4,14 @@ public class asteroid : MonoBehaviour
 {
     public AsteroidData data;
     public float speed = 5.0f;
+    private ClawModule claw;
     private Rigidbody rb;
     Vector3 screenBounds;
+
+    void Awake()
+    {
+        claw = FindAnyObjectByType<ClawModule>();
+    }
 
     void Start()
     {
@@ -54,8 +60,14 @@ public class asteroid : MonoBehaviour
 
     void OnMouseDown()
     {
-        int credits = (data != null) ? data.creditValue : 10;
-        GameManager.Instance.AddCredits(credits);
-        Destroy(gameObject);
+        if (claw == null)
+        {
+            claw = FindAnyObjectByType<ClawModule>();
+        }
+
+        if (claw != null)
+        {
+            claw.TryStartGrab(gameObject, data);
+        }
     }
 }
