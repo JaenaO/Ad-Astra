@@ -6,13 +6,22 @@ public class SceneLoader : MonoBehaviour
 {
     void Start()
     {
-        // Find the button by name and wire it up automatically
         GameObject btnObj = GameObject.Find("SceneSwapButton");
-        if (btnObj != null)
+        if (btnObj == null)
         {
-            Button btn = btnObj.GetComponent<Button>();
-            btn.onClick.AddListener(LoadShipScene);
+            Debug.LogError("SceneSwapButton not found!");
+            return;
         }
+
+        Button btn = btnObj.GetComponent<Button>();
+        if (btn == null)
+        {
+            Debug.LogError("No Button component on SceneSwapButton!");
+            return;
+        }
+
+        btn.onClick.AddListener(LoadShipScene);
+        Debug.Log("Button wired successfully!");
     }
 
     public void LoadShipScene() => SceneManager.LoadScene("ModuleScene");

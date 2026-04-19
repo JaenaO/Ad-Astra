@@ -7,11 +7,15 @@ public class ModuleManager : MonoBehaviour
 
     private HashSet<ModuleDefinition> unlockedModules = new();
     private int currentWeight = 0;
-    private int maxWeight = 4; // base: 2 engines at -1 weight +3 bonus each = 4
+    private int maxWeight = 4;
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else Destroy(gameObject);
     }
 
@@ -24,6 +28,7 @@ public class ModuleManager : MonoBehaviour
 
     public bool PrerequisitesMet(ModuleDefinition mod)
     {
+        if (mod.prerequisites == null) return true;
         foreach (var prereq in mod.prerequisites)
             if (!unlockedModules.Contains(prereq)) return false;
         return true;
@@ -34,20 +39,26 @@ public class ModuleManager : MonoBehaviour
         return (currentWeight + mod.weightCost) <= maxWeight;
     }
 
+    // Used by the shop UI (ModuleScene)
     public bool TryPurchase(ModuleDefinition mod)
     {
         if (!CanAfford(mod) || !PrerequisitesMet(mod) || !HasWeightCapacity(mod))
             return false;
 
-        // Deduct costs
         foreach (var cost in mod.costs)
             GameManager.Instance.Spend(cost.tier, cost.amount);
 
+        ActivateModule(mod);
+        return true;
+    }
+
+    // Used by the grid placement system (StructureManager)
+    public void ActivateModule(ModuleDefinition mod)
+    {
+        unlockedModules.Add(mod);
         currentWeight += mod.weightCost;
         maxWeight += mod.maxWeightBonus;
-        unlockedModules.Add(mod);
 
-        // Spawn and activate the module
         GameObject obj = new GameObject($"Module_{mod.moduleName}");
         obj.transform.SetParent(transform);
         var instance = obj.AddComponent<ModuleInstance>();
@@ -55,7 +66,6 @@ public class ModuleManager : MonoBehaviour
         instance.Activate();
 
         Debug.Log($"Built: {mod.moduleName} | Weight: {currentWeight}/{maxWeight}");
-        return true;
     }
 
     public bool IsUnlocked(ModuleDefinition mod) => unlockedModules.Contains(mod);
