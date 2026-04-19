@@ -13,6 +13,8 @@ public class ResourceCost
 public class ModuleDefinition : ScriptableObject
 {
     [Header("Identity")]
+    public string id;
+    public GameObject prefab;
     public string moduleName;
     public ModuleCategory category;
     public ModuleDefinition[] prerequisites; // parent nodes in the tree
