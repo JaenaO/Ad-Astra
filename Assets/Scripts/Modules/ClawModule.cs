@@ -194,29 +194,30 @@ public class ClawModule : MonoBehaviour
         }
     }
 
-    private void FinishAttempt()
+private void FinishAttempt()
+{
+    if (grabbed && targetAsteroid != null)
     {
-        if (grabbed && targetAsteroid != null)
+        if (GameManager.Instance != null)
         {
-            if (GameManager.Instance != null)
-            {
-                int credits = targetAsteroidData != null ? targetAsteroidData.creditValue : 10;
-                GameManager.Instance.AddCredits(credits);
-            }
-
-            Destroy(targetAsteroid);
+            // Use loot table instead of creditValue
+            if (targetAsteroidData != null)
+                targetAsteroidData.DropLoot(targetAsteroid.transform.position);
+            else
+                GameManager.Instance.AddCredits(10);
         }
 
-        if (targetRigidbody != null)
-        {
-            targetRigidbody.isKinematic = false;
-        }
-
-        targetAsteroid = null;
-        targetAsteroidData = null;
-        targetRigidbody = null;
-        grabbed = false;
+        Destroy(targetAsteroid);
     }
+
+    if (targetRigidbody != null)
+        targetRigidbody.isKinematic = false;
+
+    targetAsteroid = null;
+    targetAsteroidData = null;
+    targetRigidbody = null;
+    grabbed = false;
+}
 
     private void EnterState(ClawState nextState, float duration)
     {
