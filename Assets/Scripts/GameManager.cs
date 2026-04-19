@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+
+    [SerializeField] private string backgroundSceneName = "BackgroundScene";
 
     private Dictionary<MaterialTier, int> stockpile = new()
     {
@@ -19,6 +22,11 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            if (!SceneManager.GetSceneByName(backgroundSceneName).isLoaded)
+            {
+                SceneManager.LoadScene(backgroundSceneName, LoadSceneMode.Additive);
+            }
         }
         else
         {
