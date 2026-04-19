@@ -13,37 +13,37 @@ public class ResourceCost
 public class ModuleDefinition : ScriptableObject
 {
     [Header("Identity")]
+    public string id;           // e.g. "BASIC_ENGINE" — must match ShipManager strings
     public string moduleName;
+    public GameObject prefab;   // the 3D prefab to place on the grid
     public ModuleCategory category;
-    public ModuleDefinition[] prerequisites; // parent nodes in the tree
+    public ModuleDefinition[] prerequisites;
 
     [Header("Cost")]
     public ResourceCost[] costs;
 
     [Header("Weight")]
-    public int weightCost;      // negative impact on ship weight capacity
-
-    [Header("Engine Stats")]
+    public int weightCost;
     public int maxWeightBonus;
 
     [Header("Generator Stats")]
-    public int passiveAD;       // Asteroid Dust per tick
-    public int passiveSC;       // Space Crystal per tick
-    public int passiveF;        // Star Fragment per tick
-    public int passiveN;        // Novaflare per tick
-    public float tickInterval;  // seconds between passive generation
+    public int passiveAD;
+    public int passiveSC;
+    public int passiveF;
+    public int passiveN;
+    public float tickInterval;
 
     [Header("Converter Stats")]
     public MaterialTier convertFrom;
     public int convertFromAmount;
     public MaterialTier convertTo;
     public int convertToAmount;
-    public float convertInterval; // seconds per conversion
-    public float convertSpeedMultiplier = 1f; // Speed I/II/III
+    public float convertInterval;
+    public float convertSpeedMultiplier = 1f;
 
     [Header("Claw Stats")]
-    public int clawsUnlocked;           // how many claw arms this adds
-    public float cooldownReduction;     // Fast Grappling I/II
-    public float luckBonus;             // Lucky I/II (probability shift)
-    public int yieldRangeBonus;         // More More I/II/III
+    public int clawsUnlocked;
+    public float cooldownReduction;
+    public float luckBonus;
+    public int yieldRangeBonus;
 }
