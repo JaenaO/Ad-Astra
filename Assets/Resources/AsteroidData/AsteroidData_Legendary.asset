@@ -13,7 +13,23 @@ MonoBehaviour:
   m_Name: AsteroidData_Legendary
   m_EditorClassIdentifier: Assembly-CSharp::AsteroidData
   asteroidName: Legendary
-  creditValue: 100
   color: {r: 1, g: 0.5835624, b: 0, a: 0}
   scale: {x: 0.5, y: 0.5, z: 0.5}
   spawnWeight: 3
+  lootTable:
+  - tier: 0
+    weight: 40
+    minAmount: 10
+    maxAmount: 20
+  - tier: 1
+    weight: 25
+    minAmount: 5
+    maxAmount: 10
+  - tier: 2
+    weight: 13
+    minAmount: 1
+    maxAmount: 5
+  - tier: 3
+    weight: 22
+    minAmount: 1
+    maxAmount: 2

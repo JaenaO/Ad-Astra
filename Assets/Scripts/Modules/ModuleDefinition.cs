@@ -1,33 +1,49 @@
 using UnityEngine;
 
-namespace Modules
-{
-    public enum ModuleType
-    {
-        Core,
-        Decor,
-        Generator,
-        Engine,
-        Collector,
-        Converter,
-    }
-    
-    [CreateAssetMenu(fileName = "ModuleDefinition", menuName = "AdAstra/ModuleData")]
-    public class ModuleDefinition  : ScriptableObject
-    {
-        public string id;               // Internal ID used by the game to reference
-        public string displayName;      // Name that interfaces use to display to players
-        public ModuleType moduleType;   // Type of module that this is
-        public GameObject prefab;       // The associated prefab to this stat block
-        
-        [Header("Building stats")]
-        public int cost;
-        public float weight;
-        
-        //[Header("Unlock stats")]
-        //Not made yet
-        
+public enum ModuleCategory { Engine, Generator, Converter, Claw }
 
-    }
+[System.Serializable]
+public class ResourceCost
+{
+    public MaterialTier tier;
+    public int amount;
 }
 
+[CreateAssetMenu(fileName = "NewModule", menuName = "AdAstra/Module")]
+public class ModuleDefinition : ScriptableObject
+{
+    [Header("Identity")]
+    public string moduleName;
+    public ModuleCategory category;
+    public ModuleDefinition[] prerequisites; // parent nodes in the tree
+
+    [Header("Cost")]
+    public ResourceCost[] costs;
+
+    [Header("Weight")]
+    public int weightCost;      // negative impact on ship weight capacity
+
+    [Header("Engine Stats")]
+    public int maxWeightBonus;
+
+    [Header("Generator Stats")]
+    public int passiveAD;       // Asteroid Dust per tick
+    public int passiveSC;       // Space Crystal per tick
+    public int passiveF;        // Star Fragment per tick
+    public int passiveN;        // Novaflare per tick
+    public float tickInterval;  // seconds between passive generation
+
+    [Header("Converter Stats")]
+    public MaterialTier convertFrom;
+    public int convertFromAmount;
+    public MaterialTier convertTo;
+    public int convertToAmount;
+    public float convertInterval; // seconds per conversion
+    public float convertSpeedMultiplier = 1f; // Speed I/II/III
+
+    [Header("Claw Stats")]
+    public int clawsUnlocked;           // how many claw arms this adds
+    public float cooldownReduction;     // Fast Grappling I/II
+    public float luckBonus;             // Lucky I/II (probability shift)
+    public int yieldRangeBonus;         // More More I/II/III
+}

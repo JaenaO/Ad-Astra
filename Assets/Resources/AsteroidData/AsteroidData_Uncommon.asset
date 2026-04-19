@@ -13,7 +13,23 @@ MonoBehaviour:
   m_Name: AsteroidData_Uncommon
   m_EditorClassIdentifier: Assembly-CSharp::AsteroidData
   asteroidName: Uncommon
-  creditValue: 20
   color: {r: 0.11801351, g: 0.22630593, b: 0.49056602, a: 0}
   scale: {x: 1, y: 1, z: 1}
   spawnWeight: 25
+  lootTable:
+  - tier: 0
+    weight: 40
+    minAmount: 10
+    maxAmount: 20
+  - tier: 1
+    weight: 45
+    minAmount: 5
+    maxAmount: 10
+  - tier: 2
+    weight: 13
+    minAmount: 1
+    maxAmount: 5
+  - tier: 3
+    weight: 2
+    minAmount: 1
+    maxAmount: 2
