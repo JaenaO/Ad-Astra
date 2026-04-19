@@ -23,21 +23,21 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-        // Find text objects by name automatically - no dragging needed
-        dustText = GameObject.Find("Dust")?.GetComponent<TMP_Text>();
-        crystalText = GameObject.Find("Crystal")?.GetComponent<TMP_Text>();
-        fragmentText = GameObject.Find("Fragment")?.GetComponent<TMP_Text>();
+        dustText      = GameObject.Find("Dust")?.GetComponent<TMP_Text>();
+        crystalText   = GameObject.Find("Crystal")?.GetComponent<TMP_Text>();
+        fragmentText  = GameObject.Find("Fragment")?.GetComponent<TMP_Text>();
         novaflareText = GameObject.Find("Novaflare")?.GetComponent<TMP_Text>();
-
-            if (Instance == null)
-    {
-        Instance = this;
-        DontDestroyOnLoad(gameObject); // survives scene changes
-    }
-    else Destroy(gameObject);
     }
 
     public void AddMaterial(MaterialTier tier, int amount)
@@ -65,10 +65,9 @@ public class GameManager : MonoBehaviour
 
     void UpdateUI()
     {
-        if (dustText) dustText.text = $"Dust: {stockpile[MaterialTier.AsteroidDust]}";
-        if (crystalText) crystalText.text = $"Crystal: {stockpile[MaterialTier.SpaceCrystal]}";
-        if (fragmentText) fragmentText.text = $"Fragment: {stockpile[MaterialTier.StarFragment]}";
+        if (dustText)      dustText.text      = $"Dust: {stockpile[MaterialTier.AsteroidDust]}";
+        if (crystalText)   crystalText.text   = $"Crystal: {stockpile[MaterialTier.SpaceCrystal]}";
+        if (fragmentText)  fragmentText.text  = $"Fragment: {stockpile[MaterialTier.StarFragment]}";
         if (novaflareText) novaflareText.text = $"Novaflare: {stockpile[MaterialTier.Novaflare]}";
     }
-
 }
