@@ -15,12 +15,21 @@ public class StarFlicker : MonoBehaviour
         if (targetRenderer == null)
             targetRenderer = GetComponent<Renderer>();
 
+        if (targetRenderer == null)
+        {
+            Debug.LogWarning($"StarFlicker on {gameObject.name} has no Renderer assigned or found.");
+            enabled = false;
+            return;
+        }
+
         materialInstance = targetRenderer.material;
         baseColor = materialInstance.color;
     }
 
     void Update()
     {
+        if (materialInstance == null) return;
+
         float t = (Mathf.Sin(Time.time * flickerSpeed) + 1f) * 0.5f;
         float alpha = Mathf.Lerp(minAlpha, maxAlpha, t);
 
