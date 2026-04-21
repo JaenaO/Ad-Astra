@@ -100,3 +100,4 @@ InitTestScene*.unity*
 
 # OS generated files
 .DS_Store
+/.idea

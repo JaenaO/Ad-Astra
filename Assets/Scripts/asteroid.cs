@@ -2,32 +2,72 @@ using UnityEngine;
 
 public class asteroid : MonoBehaviour
 {
-    public float speed = 5.0f; // Speed at which the asteroid moves downwards
+    public AsteroidData data;
+    public float speed = 5.0f;
+    private ClawModule claw;
     private Rigidbody rb;
     Vector3 screenBounds;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Awake()
+    {
+        claw = FindAnyObjectByType<ClawModule>();
+    }
+
     void Start()
     {
         rb = this.GetComponent<Rigidbody>();
-        rb.linearVelocity = new Vector3(0, -speed, 0); // Set the velocity to move downwards from top to bottom of the screen
+        rb.linearVelocity = new Vector3(0, -speed, 0);
         float depth = Mathf.Abs(Camera.main.transform.position.z);
         screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, depth));
+            ApplyVisuals();
+
+        // Apply rarity visuals if data is assigned
+        if (data != null)
+        {
+            foreach (var renderer in GetComponentsInChildren<Renderer>())
+            {
+                renderer.material = new Material(renderer.material);
+                renderer.material.color = data.color;
+            }
+            transform.localScale = data.scale;
+        }
+        rb.angularVelocity = Random.insideUnitSphere * 2f;
+
+        void ApplyVisuals()
+{
+    if (data != null)
+    {
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        {
+            // Create instance properly for URP
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", data.color);
+            renderer.SetPropertyBlock(block);
+        }
+        transform.localScale = data.scale;
+    }
+}
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (transform.position.y < screenBounds.y * -1) // If the asteroid goes below the bottom of the screen
+        if (transform.position.y < screenBounds.y * -1)
         {
-            Destroy(this.gameObject); // Destroy the asteroid
+            Destroy(this.gameObject);
         }
     }
 
-    // i added this for the clickable asteroid- gives 10 credits (katy)
     void OnMouseDown()
-{
-    GameManager.Instance.AddCredits(10);
-    Destroy(gameObject);
-}
+    {
+        if (claw == null)
+        {
+            claw = FindAnyObjectByType<ClawModule>();
+        }
+
+        if (claw != null)
+        {
+            claw.TryStartGrab(gameObject, data);
+        }
+    }
 }
