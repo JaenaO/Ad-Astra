@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class FABRIKChain
 {
-    private FABRIKChain parent = null;
+    private FABRIKChain parent;
 
     private readonly List<FABRIKChain> children = new List<FABRIKChain>();
 
@@ -47,6 +47,11 @@ public class FABRIKChain
     
     public void Backward()
     {
+        if (!CanSolve)
+        {
+            return;
+        }
+
         // Store the original position to be reset below
         Vector3 origin = BaseEffector.Position;
 
@@ -81,6 +86,11 @@ public class FABRIKChain
 
     public void Forward()
     {
+        if (!CanSolve)
+        {
+            return;
+        }
+
         effectors[1].Position = BaseEffector.Position + BaseEffector.Rotation * Vector3.forward * BaseEffector.Length;
 
         for (int i = 2; i < effectors.Count; i++)
@@ -130,7 +140,15 @@ public class FABRIKChain
     {
         get
         {
-            return EndEffector.transform.childCount == 0;
+            return effectors.Count != 0 && EndEffector.transform.childCount == 0;
+        }
+    }
+
+    private bool CanSolve
+    {
+        get
+        {
+            return effectors.Count >= 2;
         }
     }
 

@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 271028481835584252}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.75}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6400046912295592507}
@@ -248,7 +248,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: -0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8779981159687899111}
@@ -266,6 +266,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClawModule
+  solver: {fileID: 2999153631469062631}
+  restPoint: {fileID: 8779981159687899111}
+  restOffsetLocal: {x: 0.35, y: 0.25, z: 0}
+  maxReachDistance: 15
+  extensionDuration: 2.5
+  holdDuration: 1
+  retractionDuration: 2.5
+  cooldownDuration: 1
+  grabRadius: 1
 --- !u!114 &2999153631469062631
 MonoBehaviour:
   m_ObjectHideFlags: 0
