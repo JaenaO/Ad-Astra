@@ -6,15 +6,16 @@ using UnityEngine;
 /// </summary>
 public class ClawModule : MonoBehaviour
 {
+    private const int DefaultCreditReward = 10;
+
     [Header("Claw Configuration")]
-    private FABRIK solver;
-    private Transform restPoint;
-    private float maxReachDistance = 15f;
-    private float extensionDuration = 2.5f;
-    private float holdDuration = 1.0f;
-    private float retractionDuration = 2.5f;
-    private float cooldownDuration = 1.0f;
-    private float grabRadius = 1.0f;
+    [SerializeField] private FABRIK solver;
+    [SerializeField] private float maxReachDistance = 15f;
+    [SerializeField] private float extensionDuration = 2.5f;
+    [SerializeField] private float holdDuration = 1.0f;
+    [SerializeField] private float retractionDuration = 2.5f;
+    [SerializeField] private float cooldownDuration = 1.0f;
+    [SerializeField] private float grabRadius = 1.0f;
 
     private enum ClawState
     {
@@ -33,6 +34,7 @@ public class ClawModule : MonoBehaviour
     private Rigidbody targetRigidbody;
     private Vector3 extensionTarget;
     private Vector3 extensionOrigin;
+    private Vector3 initialGripRestTarget;
     private bool grabbed;
 
     public bool IsAvailable => state == ClawState.Idle;
@@ -41,20 +43,18 @@ public class ClawModule : MonoBehaviour
 
     private void Awake()
     {
-        if (solver == null)
-        {
-            solver = GetComponent<FABRIK>();
-        }
+        EnsureReferences();
+        InitializeSolverState();
+    }
 
-        if (restPoint == null)
-        {
-            restPoint = transform;
-        }
-
-        if (solver != null)
-        {
-            solver.SetPrimaryTarget(restPoint.position);
-        }
+    private void OnValidate()
+    {
+        maxReachDistance = Mathf.Max(0f, maxReachDistance);
+        extensionDuration = Mathf.Max(0f, extensionDuration);
+        holdDuration = Mathf.Max(0f, holdDuration);
+        retractionDuration = Mathf.Max(0f, retractionDuration);
+        cooldownDuration = Mathf.Max(0f, cooldownDuration);
+        grabRadius = Mathf.Max(0f, grabRadius);
     }
 
     private void Update()
@@ -65,11 +65,16 @@ public class ClawModule : MonoBehaviour
         }
 
         stateTimer = Mathf.Max(0f, stateTimer - Time.deltaTime);
+        TickState();
+        solver.Solve();
+    }
 
+    private void TickState()
+    {
         switch (state)
         {
             case ClawState.Idle:
-                solver.SetPrimaryTarget(restPoint.position);
+                solver.SetPrimaryTarget(initialGripRestTarget);
                 break;
             case ClawState.Extending:
                 TickExtending();
@@ -84,8 +89,6 @@ public class ClawModule : MonoBehaviour
                 TickCooldown();
                 break;
         }
-
-        solver.Solve();
     }
 
     public bool TryStartGrab(GameObject asteroid, AsteroidData data)
@@ -95,7 +98,7 @@ public class ClawModule : MonoBehaviour
             return false;
         }
 
-        extensionOrigin = restPoint.position;
+        extensionOrigin = initialGripRestTarget;
         extensionTarget = ClampToMaxReach(extensionOrigin, asteroid.transform.position);
 
         targetAsteroid = asteroid;
@@ -115,7 +118,7 @@ public class ClawModule : MonoBehaviour
             return position;
         }
 
-        return restPoint != null ? restPoint.position : transform.position;
+        return initialGripRestTarget;
     }
 
     private void TickExtending()
@@ -134,13 +137,7 @@ public class ClawModule : MonoBehaviour
             float distToAsteroid = Vector3.Distance(gripPoint, targetAsteroid.transform.position);
             if (distToAsteroid <= grabRadius)
             {
-                grabbed = true;
-
-                if (targetRigidbody != null)
-                {
-                    targetRigidbody.isKinematic = true;
-                }
-
+                MarkTargetAsGrabbed();
                 EnterState(ClawState.Holding, holdDuration);
                 return;
             }
@@ -172,7 +169,7 @@ public class ClawModule : MonoBehaviour
     private void TickRetracting()
     {
         float t = retractionDuration <= 0f ? 1f : 1f - (stateTimer / retractionDuration);
-        solver.SetPrimaryTarget(Vector3.Lerp(extensionTarget, restPoint.position, Mathf.Clamp01(t)));
+        solver.SetPrimaryTarget(Vector3.Lerp(extensionTarget, initialGripRestTarget, Mathf.Clamp01(t)));
 
         if (grabbed && targetAsteroid != null)
         {
@@ -194,35 +191,77 @@ public class ClawModule : MonoBehaviour
         }
     }
 
-private void FinishAttempt()
-{
-    if (grabbed && targetAsteroid != null)
+    private void FinishAttempt()
     {
-        if (GameManager.Instance != null)
+        if (grabbed && targetAsteroid != null)
         {
-            // Use loot table instead of creditValue
             if (targetAsteroidData != null)
+            {
                 targetAsteroidData.DropLoot(targetAsteroid.transform.position);
-            else
-                GameManager.Instance.AddCredits(10);
+            }
+            else if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddCredits(DefaultCreditReward);
+            }
+
+            Destroy(targetAsteroid);
         }
 
-        Destroy(targetAsteroid);
+        if (targetRigidbody != null)
+        {
+            targetRigidbody.isKinematic = false;
+        }
+
+        targetAsteroid = null;
+        targetAsteroidData = null;
+        targetRigidbody = null;
+        grabbed = false;
     }
-
-    if (targetRigidbody != null)
-        targetRigidbody.isKinematic = false;
-
-    targetAsteroid = null;
-    targetAsteroidData = null;
-    targetRigidbody = null;
-    grabbed = false;
-}
 
     private void EnterState(ClawState nextState, float duration)
     {
         state = nextState;
         stateTimer = Mathf.Max(0f, duration);
+    }
+
+    private void EnsureReferences()
+    {
+        if (solver == null)
+        {
+            solver = GetComponent<FABRIK>();
+        }
+    }
+
+    private void InitializeSolverState()
+    {
+        if (solver == null)
+        {
+            return;
+        }
+
+        // ClawModule drives solve timing explicitly in Update().
+        solver.SetAutoSolve(false);
+
+        if (solver.TryGetPrimaryEndEffectorPosition(out Vector3 initialGrip))
+        {
+            initialGripRestTarget = initialGrip;
+        }
+        else
+        {
+            initialGripRestTarget = transform.position;
+        }
+
+        solver.SetPrimaryTarget(initialGripRestTarget);
+    }
+
+    private void MarkTargetAsGrabbed()
+    {
+        grabbed = true;
+
+        if (targetRigidbody != null)
+        {
+            targetRigidbody.isKinematic = true;
+        }
     }
 
     private Vector3 ClampToMaxReach(Vector3 origin, Vector3 target)

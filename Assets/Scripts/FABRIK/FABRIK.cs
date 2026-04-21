@@ -12,7 +12,7 @@ public class FABRIK : MonoBehaviour
 
     [SerializeField] private bool autoSolve = true;
 
-    public void Awake()
+    private void Awake()
     {
         Rebuild();
     }
@@ -24,6 +24,11 @@ public class FABRIK : MonoBehaviour
         primaryEndChainName = null;
 
         rootChain = LoadSystem(transform);
+
+        if (rootChain == null)
+        {
+            return;
+        }
 
         // Inversely sort by layer, greater-first for backward pass.
         chains.Sort((x, y) => y.Layer.CompareTo(x.Layer));
@@ -46,8 +51,13 @@ public class FABRIK : MonoBehaviour
         }
     }
 
-    private FABRIKChain LoadSystem(Transform transform, FABRIKChain parent = null, int layer = 0)
+    private FABRIKChain LoadSystem(Transform currentTransform, FABRIKChain parent = null, int layer = 0)
     {
+        if (currentTransform == null)
+        {
+            return null;
+        }
+
         List<FABRIKEffector> effectors = new List<FABRIKEffector>();
 
         // Use parent chain's end effector as our sub-base effector, e.g:
@@ -64,9 +74,9 @@ public class FABRIK : MonoBehaviour
         // childCount > 1 is a new sub-base
         // childCount = 0 is an end chain (added to our list below)
         // childCount = 1 is continuation of chain
-        while (transform != null)
+        while (currentTransform != null)
         {
-            FABRIKEffector effector = transform.GetComponent<FABRIKEffector>();
+            FABRIKEffector effector = currentTransform.GetComponent<FABRIKEffector>();
 
             if (effector == null)
             {
@@ -75,12 +85,17 @@ public class FABRIK : MonoBehaviour
 
             effectors.Add(effector);
 
-            if (transform.childCount != 1)
+            if (currentTransform.childCount != 1)
             {
                 break;
             }
-            
-            transform = transform.GetChild(0);
+
+            currentTransform = currentTransform.GetChild(0);
+        }
+
+        if (effectors.Count == 0)
+        {
+            return null;
         }
 
         FABRIKChain chain = new FABRIKChain(parent, effectors, layer);
@@ -90,14 +105,14 @@ public class FABRIK : MonoBehaviour
         // Add to our end chain list if it is an end chain
         if (chain.IsEndChain)
         {
-            string chainName = transform.gameObject.name;
+            string chainName = chain.EndEffector.gameObject.name;
             if (!endChains.ContainsKey(chainName))
             {
                 endChains.Add(chainName, chain);
             }
         }
         // Else iterate over each of the end effector's children to create a new chain in the layer above
-        else foreach (Transform child in transform)
+        else foreach (Transform child in chain.EndEffector.transform)
         {
             LoadSystem(child, chain, layer + 1);
         }
@@ -105,7 +120,7 @@ public class FABRIK : MonoBehaviour
         return chain;
     }
 
-    public void Update()
+    private void Update()
     {
         if (autoSolve)
         {
@@ -151,6 +166,11 @@ public class FABRIK : MonoBehaviour
 
         position = chain.EndEffector.Position;
         return true;
+    }
+
+    public void SetAutoSolve(bool enabled)
+    {
+        autoSolve = enabled;
     }
 
     public void Solve()

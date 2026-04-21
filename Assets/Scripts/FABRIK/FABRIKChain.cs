@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class FABRIKChain
 {
-    private FABRIKChain parent = null;
+    private FABRIKChain parent;
 
     private readonly List<FABRIKChain> children = new List<FABRIKChain>();
 
@@ -44,9 +44,14 @@ public class FABRIKChain
             summedWeight += child.EndEffector.Weight;
         }
     }
-    
+
     public void Backward()
     {
+        if (!CanSolve)
+        {
+            return;
+        }
+
         // Store the original position to be reset below
         Vector3 origin = BaseEffector.Position;
 
@@ -81,12 +86,17 @@ public class FABRIKChain
 
     public void Forward()
     {
+        if (!CanSolve)
+        {
+            return;
+        }
+
         effectors[1].Position = BaseEffector.Position + BaseEffector.Rotation * Vector3.forward * BaseEffector.Length;
 
         for (int i = 2; i < effectors.Count; i++)
         {
             Vector3 direction = Vector3.Normalize(effectors[i].Position - effectors[i - 1].Position);
-                        
+
             effectors[i - 1].ApplyConstraints(direction);
 
             effectors[i].Position = effectors[i - 1].Position + effectors[i - 1].Rotation * Vector3.forward * effectors[i - 1].Length;
@@ -100,7 +110,7 @@ public class FABRIKChain
             // In order to constrain a sub-base end effector, we must average the directions of its children
             Vector3 direction = Vector3.zero;
 
-            foreach(FABRIKChain child in children)
+            foreach (FABRIKChain child in children)
             {
                 direction += Vector3.Normalize(child.effectors[1].Position - EndEffector.Position);
             }
@@ -130,7 +140,15 @@ public class FABRIKChain
     {
         get
         {
-            return EndEffector.transform.childCount == 0;
+            return effectors.Count != 0 && EndEffector.transform.childCount == 0;
+        }
+    }
+
+    private bool CanSolve
+    {
+        get
+        {
+            return effectors.Count >= 2;
         }
     }
 

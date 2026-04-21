@@ -4,48 +4,70 @@ public class asteroid : MonoBehaviour
 {
     public AsteroidData data;
     public float speed = 5.0f;
+    private ClawModule claw;
     private Rigidbody rb;
-    private Vector3 screenBounds;
+    Vector3 screenBounds;
+
+    void Awake()
+    {
+        claw = FindAnyObjectByType<ClawModule>();
+    }
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        rb = this.GetComponent<Rigidbody>();
         rb.linearVelocity = new Vector3(0, -speed, 0);
-        rb.angularVelocity = Random.insideUnitSphere * 2f;
-
         float depth = Mathf.Abs(Camera.main.transform.position.z);
         screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, depth));
-
         ApplyVisuals();
-    }
 
-    void ApplyVisuals()
-    {
-        if (data == null) return;
-
-        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        // Apply rarity visuals if data is assigned
+        if (data != null)
         {
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            renderer.GetPropertyBlock(block);
-            block.SetColor("_BaseColor", data.color);
-            renderer.SetPropertyBlock(block);
+            foreach (var renderer in GetComponentsInChildren<Renderer>())
+            {
+                renderer.material = new Material(renderer.material);
+                renderer.material.color = data.color;
+            }
+            transform.localScale = data.scale;
         }
-        transform.localScale = data.scale;
+        rb.angularVelocity = Random.insideUnitSphere * 2f;
+
+        void ApplyVisuals()
+        {
+            if (data != null)
+            {
+                foreach (var renderer in GetComponentsInChildren<Renderer>())
+                {
+                    // Create instance properly for URP
+                    MaterialPropertyBlock block = new MaterialPropertyBlock();
+                    renderer.GetPropertyBlock(block);
+                    block.SetColor("_BaseColor", data.color);
+                    renderer.SetPropertyBlock(block);
+                }
+                transform.localScale = data.scale;
+            }
+        }
     }
 
     void Update()
     {
-        if (transform.position.y < -screenBounds.y)
-            Destroy(gameObject);
+        if (transform.position.y < screenBounds.y * -1)
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     void OnMouseDown()
     {
-        if (data != null)
-            data.DropLoot(transform.position);
-        else
-            GameManager.Instance.AddCredits(10);
+        if (claw == null)
+        {
+            claw = FindAnyObjectByType<ClawModule>();
+        }
 
-        Destroy(gameObject);
+        if (claw != null)
+        {
+            claw.TryStartGrab(gameObject, data);
+        }
     }
 }
