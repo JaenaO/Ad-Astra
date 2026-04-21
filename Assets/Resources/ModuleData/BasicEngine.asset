@@ -13,8 +13,25 @@ MonoBehaviour:
   m_Name: BasicEngine
   m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
   id: BASIC_ENGINE
-  displayName: Basic Engine
-  moduleType: 3
+  moduleName: Basic engine
   prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
-  cost: 500
-  weight: 5
+  category: 0
+  prerequisites: []
+  costs: []
+  weightCost: 0
+  maxWeightBonus: 0
+  passiveAD: 0
+  passiveSC: 0
+  passiveF: 0
+  passiveN: 0
+  tickInterval: 0
+  convertFrom: 0
+  convertFromAmount: 0
+  convertTo: 0
+  convertToAmount: 0
+  convertInterval: 0
+  convertSpeedMultiplier: 1
+  clawsUnlocked: 0
+  cooldownReduction: 0
+  luckBonus: 0
+  yieldRangeBonus: 0

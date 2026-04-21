@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
-  m_Name: BasicCore
+  m_Name: BasicEngine 1
   m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
-  id: BASIC_CORE
-  moduleName: 
-  prefab: {fileID: 9192071855795361171, guid: 7c6b4781aa3237344be83f5770a2887f, type: 3}
+  id: ENGINE_ONE
+  moduleName: Upgraded engine
+  prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
   category: 0
   prerequisites: []
   costs: []
   weightCost: 0
-  maxWeightBonus: 4
+  maxWeightBonus: 0
   passiveAD: 0
   passiveSC: 0
   passiveF: 0
