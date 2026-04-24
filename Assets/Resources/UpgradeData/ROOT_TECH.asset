@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b19de05b4b150d94cb7e130061c8ba31, type: 3}
+  m_Name: ROOT_TECH
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeDefinition
+  upgradeName: Basic parts
+  directChild: {fileID: 0}
+  branchChildren: []
+  unlocks:
+  - {fileID: 11400000, guid: 8435dcaaf88f4b54186c476bdaebd05a, type: 2}
+  - {fileID: 11400000, guid: 4f77aa0771cdf034f8751036e1f9a263, type: 2}
+  - {fileID: 11400000, guid: e5eb5f4b457629a48b00cb396a8568cb, type: 2}
