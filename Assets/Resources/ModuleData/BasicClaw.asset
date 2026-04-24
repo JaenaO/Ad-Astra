@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
+  m_Name: BasicClaw
+  m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
+  id: BASIC_CLAW
+  moduleName: Basic claw
+  prefab: {fileID: 3554229377866931639, guid: c0030a7aa58084923866f452c9b69516, type: 3}
+  category: 3
+  prerequisites: []
+  costs: []
+  weightCost: 0
+  maxWeightBonus: 0
+  passiveAD: 0
+  passiveSC: 0
+  passiveF: 0
+  passiveN: 0
+  tickInterval: 0
+  convertFrom: 0
+  convertFromAmount: 0
+  convertTo: 0
+  convertToAmount: 0
+  convertInterval: 0
+  convertSpeedMultiplier: 1
+  clawsUnlocked: 1
+  cooldownReduction: 0
+  luckBonus: 0
+  yieldRangeBonus: 0
