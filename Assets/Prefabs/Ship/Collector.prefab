@@ -268,11 +268,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ClawModule
   solver: {fileID: 2999153631469062631}
   maxReachDistance: 15
-  extensionDuration: 2.5
-  holdDuration: 1
-  retractionDuration: 2.5
-  cooldownDuration: 1
+  extensionDuration: 0.25
+  holdDuration: 0.1
+  retractionDuration: 0.25
+  cooldownDuration: 0.1
   grabRadius: 1
+  restDistanceFromRoot: 4
 --- !u!114 &2999153631469062631
 MonoBehaviour:
   m_ObjectHideFlags: 0
