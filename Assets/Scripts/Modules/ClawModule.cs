@@ -10,12 +10,13 @@ public class ClawModule : MonoBehaviour
 
     [Header("Claw Configuration")]
     [SerializeField] private FABRIK solver;
-    [SerializeField] private float maxReachDistance = 15f;
-    [SerializeField] private float extensionDuration = 2.5f;
-    [SerializeField] private float holdDuration = 1.0f;
-    [SerializeField] private float retractionDuration = 2.5f;
-    [SerializeField] private float cooldownDuration = 1.0f;
+    [SerializeField] private float maxReachDistance = 15.0f;
+    [SerializeField] private float extensionDuration = 0.25f;
+    [SerializeField] private float holdDuration = 0.1f;
+    [SerializeField] private float retractionDuration = 0.25f;
+    [SerializeField] private float cooldownDuration = 0.10f;
     [SerializeField] private float grabRadius = 1.0f;
+    [SerializeField] private float restDistanceFromRoot = 4.0f;
 
     private enum ClawState
     {
@@ -34,7 +35,6 @@ public class ClawModule : MonoBehaviour
     private Rigidbody targetRigidbody;
     private Vector3 extensionTarget;
     private Vector3 extensionOrigin;
-    private Vector3 initialGripRestTarget;
     private bool grabbed;
 
     public bool IsAvailable => state == ClawState.Idle;
@@ -55,6 +55,7 @@ public class ClawModule : MonoBehaviour
         retractionDuration = Mathf.Max(0f, retractionDuration);
         cooldownDuration = Mathf.Max(0f, cooldownDuration);
         grabRadius = Mathf.Max(0f, grabRadius);
+        restDistanceFromRoot = Mathf.Max(0f, restDistanceFromRoot);
     }
 
     private void Update()
@@ -74,7 +75,7 @@ public class ClawModule : MonoBehaviour
         switch (state)
         {
             case ClawState.Idle:
-                solver.SetPrimaryTarget(initialGripRestTarget);
+                solver.SetPrimaryTarget(GetRestTargetWorld());
                 break;
             case ClawState.Extending:
                 TickExtending();
@@ -98,7 +99,7 @@ public class ClawModule : MonoBehaviour
             return false;
         }
 
-        extensionOrigin = initialGripRestTarget;
+        extensionOrigin = GetRestTargetWorld();
         extensionTarget = ClampToMaxReach(extensionOrigin, asteroid.transform.position);
 
         targetAsteroid = asteroid;
@@ -118,7 +119,7 @@ public class ClawModule : MonoBehaviour
             return position;
         }
 
-        return initialGripRestTarget;
+        return GetRestTargetWorld();
     }
 
     private void TickExtending()
@@ -168,8 +169,9 @@ public class ClawModule : MonoBehaviour
 
     private void TickRetracting()
     {
+        Vector3 restTarget = GetRestTargetWorld();
         float t = retractionDuration <= 0f ? 1f : 1f - (stateTimer / retractionDuration);
-        solver.SetPrimaryTarget(Vector3.Lerp(extensionTarget, initialGripRestTarget, Mathf.Clamp01(t)));
+        solver.SetPrimaryTarget(Vector3.Lerp(extensionTarget, restTarget, Mathf.Clamp01(t)));
 
         if (grabbed && targetAsteroid != null)
         {
@@ -242,16 +244,12 @@ public class ClawModule : MonoBehaviour
         // ClawModule drives solve timing explicitly in Update().
         solver.SetAutoSolve(false);
 
-        if (solver.TryGetPrimaryEndEffectorPosition(out Vector3 initialGrip))
-        {
-            initialGripRestTarget = initialGrip;
-        }
-        else
-        {
-            initialGripRestTarget = transform.position;
-        }
+        solver.SetPrimaryTarget(GetRestTargetWorld());
+    }
 
-        solver.SetPrimaryTarget(initialGripRestTarget);
+    private Vector3 GetRestTargetWorld()
+    {
+        return transform.position + Vector3.back * restDistanceFromRoot;
     }
 
     private void MarkTargetAsGrabbed()

@@ -23,6 +23,15 @@ public class ModuleInstance : MonoBehaviour
         }
     }
 
+    public void Deactivate()
+    {
+        if (!isRunning)
+            return;
+
+        StopAllCoroutines();
+        isRunning = false;
+    }
+
     // ── GENERATOR ────────────────────────────────────────────
     // Simple:   +5 AD / 10s
     // Advanced: +5 AD +2 SC / 15s

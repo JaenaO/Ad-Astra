@@ -4,14 +4,8 @@ public class asteroid : MonoBehaviour
 {
     public AsteroidData data;
     public float speed = 5.0f;
-    private ClawModule claw;
     private Rigidbody rb;
     Vector3 screenBounds;
-
-    void Awake()
-    {
-        claw = FindAnyObjectByType<ClawModule>();
-    }
 
     void Start()
     {
@@ -22,7 +16,7 @@ public class asteroid : MonoBehaviour
         ApplyVisuals();
 
         // Apply rarity visuals if data is assigned
-        if (data != null)
+        if (!data)
         {
             foreach (var renderer in GetComponentsInChildren<Renderer>())
             {
@@ -60,14 +54,24 @@ public class asteroid : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (claw == null)
+        ClawModule bestClaw = null;
+        float bestDistanceSqr = float.MaxValue;
+
+        var claws = FindObjectsByType<ClawModule>(FindObjectsInactive.Exclude);
+        foreach (var candidate in claws)
         {
-            claw = FindAnyObjectByType<ClawModule>();
+            if (!candidate || !candidate.IsAvailable)
+                continue;
+
+            float distanceSqr = (candidate.transform.position - transform.position).sqrMagnitude;
+            if (distanceSqr >= bestDistanceSqr)
+                continue;
+
+            bestDistanceSqr = distanceSqr;
+            bestClaw = candidate;
         }
 
-        if (claw != null)
-        {
-            claw.TryStartGrab(gameObject, data);
-        }
+        if (bestClaw != null)
+            bestClaw.TryStartGrab(gameObject, data);
     }
 }

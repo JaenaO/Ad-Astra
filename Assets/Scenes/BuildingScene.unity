@@ -1366,9 +1366,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4da82a4dfbc1a7544a900677b62169e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Modules.ShipModuleBuilder
-  showGrid: 1
-  emptyCellColor: {r: 0.2, g: 0.8, b: 1, a: 0.25}
-  occupiedCellColor: {r: 1, g: 0.75, b: 0.2, a: 0.45}
+  horizontalGridTiles: 9
+  verticalGridTiles: 6
+  cellSize: 2
+  gridOriginOffset: {x: -4, y: 0}
 --- !u!4 &1141276200
 Transform:
   m_ObjectHideFlags: 0
@@ -1397,62 +1398,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuilderController
   shipModuleBuilder: {fileID: 1141276199}
-  uiController: {fileID: 1143249959}
+  uiController: {fileID: 0}
   buildCamera: {fileID: 353354320}
   moveKey: 109
   nextModuleKey: 101
   previousModuleKey: 113
   enableKeyboardModuleSelection: 1
   moduleResourcePath: ModuleData
---- !u!1 &1143249958
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1143249960}
-  - component: {fileID: 1143249959}
-  m_Layer: 0
-  m_Name: UIController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1143249959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1143249958}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eee7a14917f7b41f181c33c52aa47c98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIController
-  placeRoadButton: {fileID: 0}
-  moduleButtonPrefab: {fileID: 0}
-  moduleButtonContainer: {fileID: 0}
-  availableModules: []
-  outlineColor: {r: 0, g: 0, b: 0, a: 0}
---- !u!4 &1143249960
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1143249958}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 8.42232}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1239689391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2074,4 +2026,3 @@ SceneRoots:
   - {fileID: 100794949}
   - {fileID: 1141276200}
   - {fileID: 1793551506}
-  - {fileID: 1143249960}

@@ -1503,6 +1503,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4da82a4dfbc1a7544a900677b62169e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipModuleBuilder
+  horizontalGridTiles: 9
+  verticalGridTiles: 6
+  cellSize: 2
+  gridOriginOffset: {x: 0, y: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

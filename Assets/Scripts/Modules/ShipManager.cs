@@ -6,156 +6,71 @@ namespace Modules
 {
     public class ShipModuleBuilder : MonoBehaviour
     {
-        private static readonly Vector2Int[] CardinalDirections =
-        {
-            Vector2Int.up,
-            Vector2Int.down,
-            Vector2Int.left,
-            Vector2Int.right,
-        };
-
-        private const int GridScale = 2;
-        private const int VerticalGridTiles = 10;
-        private const int HorizontalGridTiles = 5;
-
-        private readonly Vector2Int CenterIndex = new(HorizontalGridTiles / 2, VerticalGridTiles / 2);
-
-        private readonly GameObject[,] ModuleGrid = new GameObject[HorizontalGridTiles, VerticalGridTiles];
-        private Dictionary<string, ModuleDefinition> ModuleStorage;
-
+        [Header("Grid Settings")]
+        [Min(1)]
+        [SerializeField] private int horizontalGridTiles = 9;
+        [Min(1)]
+        [SerializeField] private int verticalGridTiles = 6;
+        [Min(0.1f)]
+        [SerializeField] private float cellSize = 2f;
         [SerializeField] private Vector2 gridOriginOffset;
 
-        [NonSerialized]
-        public int CurrentWeight = 0;
-        [NonSerialized]
-        public int MaxWeight = 0;
-        [NonSerialized]
-        public int CurrentEngines = 0;
-        [NonSerialized]
-        public int MaxEngines = 2;
-        
-        [Header("Debug Grid")]
-        [SerializeField] private bool showGrid = true;
-        [SerializeField] private Color emptyCellColor = new(0.2f, 0.8f, 1f, 0.25f);
-        [SerializeField] private Color occupiedCellColor = new(1f, 0.75f, 0.2f, 0.45f);
-        
-        private void OnDrawGizmos()
-        {
-            if (!showGrid)
-                return;
+        private ShipGrid shipGrid;
+        private Dictionary<string, ModuleDefinition> moduleStorage;
+        private ShipGridRenderer gridRenderer;
+        private bool isBuilderMode;
 
-            for (int x = 0; x < HorizontalGridTiles; x++)
-            {
-                for (int y = 0; y < VerticalGridTiles; y++)
-                {
-                    Vector2Int gridPosition = new(
-                        x - CenterIndex.x,
-                        y - CenterIndex.y);
+        private const float ModuleDepthOffset = 0f;
+        private const float GridVisualDepthOffset = 0f;
+        private const int GridSortingOrder = 5000;
+        private static readonly Color EmptyCellColor = new(0.2f, 0.8f, 1f, 0.45f);
+        private static readonly Color OccupiedCellColor = new(1f, 0.75f, 0.2f, 0.6f);
 
-                    Vector3 localCenter = new(
-                        gridPosition.x * GridScale,
-                        gridPosition.y * GridScale,
-                        0f);
+        [NonSerialized] public int CurrentWeight = 0;
+        [NonSerialized] public int MaxWeight = 0;
+        [NonSerialized] public int CurrentEngines = 0;
 
-                    Vector3 worldCenter = transform.TransformPoint(localCenter);
-                    bool occupied = ModuleGrid[x, y] != null;
-
-                    Gizmos.color = occupied ? occupiedCellColor : emptyCellColor;
-                    Gizmos.DrawWireCube(worldCenter, new Vector3(GridScale, GridScale, 0.05f));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Converts a grid cell offset into local space.
-        /// </summary>
         private Vector3 GridToLocalPosition(Vector2Int gridPosition)
         {
-            return new Vector3(
-                gridPosition.x * GridScale + gridOriginOffset.x,
-                gridPosition.y * GridScale + gridOriginOffset.y,
-                0f
-            );
+            float activeCellSize = Mathf.Max(0.1f, cellSize);
+            float x = gridPosition.x * activeCellSize + gridOriginOffset.x;
+            float y = gridPosition.y * activeCellSize + gridOriginOffset.y;
+            return new Vector3(x, y, ModuleDepthOffset);
         }
 
-        /// <summary>
-        /// Converts a world-space position into a relative ship grid cell.
-        /// </summary>
         public bool TryWorldToGridPosition(Vector3 worldPosition, out Vector2Int gridPosition)
         {
-            var local = transform.InverseTransformPoint(worldPosition);
-            local.x -= gridOriginOffset.x;
-            local.y -= gridOriginOffset.y;
+            float activeCellSize = Mathf.Max(0.1f, cellSize);
+            Vector3 local = transform.InverseTransformPoint(worldPosition);
+
+            float x = local.x - gridOriginOffset.x;
+            float y = local.y - gridOriginOffset.y;
 
             gridPosition = new Vector2Int(
-                Mathf.RoundToInt(local.x / GridScale),
-                Mathf.RoundToInt(local.y / GridScale)
-            );
+                Mathf.RoundToInt(x / activeCellSize),
+                Mathf.RoundToInt(y / activeCellSize));
 
-            return TryGetGridIndex(gridPosition, out _);
+            return shipGrid != null && shipGrid.IsInBounds(gridPosition);
         }
 
-        /// <summary>
-        /// Converts a relative grid position into the array index used by ModuleGrid.
-        /// </summary>
-        private bool TryGetGridIndex(Vector2Int gridPosition, out Vector2Int gridIndex)
-        {
-            gridIndex = CenterIndex + gridPosition;
-            return gridIndex.x >= 0
-                && gridIndex.x < HorizontalGridTiles
-                && gridIndex.y >= 0
-                && gridIndex.y < VerticalGridTiles;
-        }
-
-        /// <summary>
-        /// Returns the module currently stored at a grid position.
-        /// </summary>
         public GameObject GetModuleAt(Vector2Int gridPosition)
         {
-            return TryGetGridIndex(gridPosition, out var gridIndex) ? ModuleGrid[gridIndex.x, gridIndex.y] : null;
+            return shipGrid?.GetModule(gridPosition);
         }
 
-        /// <summary>
-        /// Checks whether a grid position touches the existing ship.
-        /// </summary>
-        private bool HasAdjacentModule(Vector2Int gridIndex)
+        public Vector3 GetBuildPlaneNormalWorld()
         {
-            foreach (var direction in CardinalDirections)
-            {
-                var neighbor = gridIndex + direction;
-                if (neighbor.x < 0 || neighbor.x >= HorizontalGridTiles || neighbor.y < 0 || neighbor.y >= VerticalGridTiles)
-                    continue;
-
-                if (ModuleGrid[neighbor.x, neighbor.y] != null)
-                    return true;
-            }
-
-            return false;
+            return transform.forward;
         }
 
-        /// <summary>
-        /// Checks whether any modules remain on the grid.
-        /// </summary>
-        private bool HasAnyModule()
+        public Vector3 GetBuildPlanePointWorld()
         {
-            for (var x = 0; x < HorizontalGridTiles; x++)
-            {
-                for (var y = 0; y < VerticalGridTiles; y++)
-                {
-                    if (ModuleGrid[x, y] != null)
-                        return true;
-                }
-            }
-
-            return false;
+            return transform.TransformPoint(GridToLocalPosition(Vector2Int.zero));
         }
 
-        /// <summary>
-        /// Gets a module definition by id and logs a warning if it is missing.
-        /// </summary>
         private bool TryGetModuleDefinition(string moduleId, out ModuleDefinition moduleDefinition)
         {
-            if (ModuleStorage != null && ModuleStorage.TryGetValue(moduleId, out moduleDefinition) && moduleDefinition != null)
+            if (moduleStorage != null && moduleStorage.TryGetValue(moduleId, out moduleDefinition) && moduleDefinition != null)
                 return true;
 
             Debug.LogWarning($"Missing module definition: '{moduleId}'.");
@@ -163,19 +78,24 @@ namespace Modules
             return false;
         }
 
-        /// <summary>
-        /// Applies the module to the grid and updates ship stats.
-        /// </summary>
         private GameObject CreateModule(ModuleDefinition moduleDefinition, Vector2Int gridPosition)
         {
-            if (!TryGetGridIndex(gridPosition, out var gridIndex))
+            if (shipGrid == null || !shipGrid.IsInBounds(gridPosition))
             {
                 Debug.LogWarning($"Grid position {gridPosition} is outside the build area.");
                 return null;
             }
 
-            var newModule = Instantiate(moduleDefinition.prefab, GridToLocalPosition(gridPosition), Quaternion.identity, transform);
-            ModuleGrid[gridIndex.x, gridIndex.y] = newModule;
+            if (shipGrid.IsOccupied(gridPosition))
+            {
+                Debug.LogWarning($"Grid position {gridPosition} is already occupied.");
+                return null;
+            }
+
+            GameObject newModule = Instantiate(moduleDefinition.prefab, transform);
+            newModule.transform.localPosition = GridToLocalPosition(gridPosition);
+            newModule.transform.localRotation = Quaternion.identity;
+            shipGrid.TrySetModule(gridPosition, newModule);
 
             CurrentWeight += moduleDefinition.weightCost;
             MaxWeight += moduleDefinition.maxWeightBonus;
@@ -183,48 +103,46 @@ namespace Modules
             if (moduleDefinition.category == ModuleCategory.Engine)
                 CurrentEngines += 1;
 
-            var instance = newModule.AddComponent<ModuleInstance>();
+            ModuleInstance instance = newModule.AddComponent<ModuleInstance>();
             instance.definition = moduleDefinition;
-            instance.Activate();
+            instance.enabled = false;
 
             return newModule;
         }
 
-        /// <summary>
-        /// Places a module without validation. Use TryPlaceModule for player-driven placement.
-        /// </summary>
         public GameObject PlaceModule(ModuleDefinition moduleDefinition, Vector2Int gridPosition)
         {
-            return CreateModule(moduleDefinition, gridPosition);
+            GameObject created = CreateModule(moduleDefinition, gridPosition);
+            if (created != null)
+            {
+                SaveLayoutToSession();
+                RefreshGridVisuals();
+            }
+
+            return created;
         }
 
-        /// <summary>
-        /// Validates whether the player can place a module on the current ship.
-        /// </summary>
         public bool CanPlaceModule(ModuleDefinition moduleDefinition, Vector2Int gridPosition)
         {
             if (moduleDefinition == null || moduleDefinition.prefab == null)
                 return false;
 
-            if (!TryGetGridIndex(gridPosition, out var gridIndex))
+            if (shipGrid == null || !shipGrid.IsInBounds(gridPosition))
                 return false;
 
-            if (ModuleGrid[gridIndex.x, gridIndex.y] != null)
+            if (shipGrid.IsOccupied(gridPosition))
                 return false;
 
             if (CurrentWeight + moduleDefinition.weightCost > MaxWeight)
                 return false;
 
-            if (moduleDefinition.category == ModuleCategory.Engine && CurrentEngines + 1 > MaxEngines)
+            if (shipGrid.HasAnyModule() && !shipGrid.HasAdjacentModule(gridPosition))
                 return false;
 
-            if (HasAnyModule() && !HasAdjacentModule(gridIndex))
-                return false;
-
+            ResourceCost[] costs = moduleDefinition.costs ?? Array.Empty<ResourceCost>();
             if (GameManager.Instance == null)
-                return false;
+                return true;
 
-            var costs = moduleDefinition.costs ?? Array.Empty<ResourceCost>();
             foreach (var cost in costs)
             {
                 if (GameManager.Instance.GetStock(cost.tier) < cost.amount)
@@ -234,39 +152,42 @@ namespace Modules
             return true;
         }
 
-        /// <summary>
-        /// Places a module if the ship rules and resource checks allow it.
-        /// </summary>
         public bool TryPlaceModule(ModuleDefinition moduleDefinition, Vector2Int gridPosition)
         {
             if (!CanPlaceModule(moduleDefinition, gridPosition))
                 return false;
 
-            var costs = moduleDefinition.costs ?? Array.Empty<ResourceCost>();
-            foreach (var cost in costs)
-                GameManager.Instance.Spend(cost.tier, cost.amount);
+            ResourceCost[] costs = moduleDefinition.costs ?? Array.Empty<ResourceCost>();
+            if (GameManager.Instance != null)
+            {
+                foreach (var cost in costs)
+                    GameManager.Instance.Spend(cost.tier, cost.amount);
+            }
 
-            CreateModule(moduleDefinition, gridPosition);
+            GameObject created = CreateModule(moduleDefinition, gridPosition);
+            if (created == null)
+                return false;
+
+            SaveLayoutToSession();
+            RefreshGridVisuals();
             return true;
         }
 
-        /// <summary>
-        /// Removes a module from the grid and updates ship stats.
-        /// </summary>
         public bool TryRemoveModule(Vector2Int gridPosition)
         {
-            if (!TryGetGridIndex(gridPosition, out var gridIndex))
+            if (shipGrid == null)
                 return false;
 
-            var moduleObject = ModuleGrid[gridIndex.x, gridIndex.y];
+            GameObject moduleObject = shipGrid.GetModule(gridPosition);
             if (moduleObject == null)
                 return false;
 
-            var instance = moduleObject.GetComponent<ModuleInstance>();
+            ModuleInstance instance = moduleObject.GetComponent<ModuleInstance>();
             if (instance == null || instance.definition == null)
                 return false;
 
-            ModuleGrid[gridIndex.x, gridIndex.y] = null;
+            shipGrid.TryClearModule(gridPosition, out _);
+
             CurrentWeight = Mathf.Max(0, CurrentWeight - instance.definition.weightCost);
             MaxWeight = Mathf.Max(0, MaxWeight - instance.definition.maxWeightBonus);
 
@@ -274,47 +195,167 @@ namespace Modules
                 CurrentEngines = Mathf.Max(0, CurrentEngines - 1);
 
             Destroy(moduleObject);
+            SaveLayoutToSession();
+            RefreshGridVisuals();
             return true;
         }
 
-        /// <summary>
-        /// Moves a module to another valid grid position without changing its stats.
-        /// </summary>
         public bool TryMoveModule(Vector2Int fromGridPosition, Vector2Int toGridPosition)
         {
             if (fromGridPosition == toGridPosition)
                 return true;
 
-            if (!TryGetGridIndex(fromGridPosition, out var fromGridIndex))
+            if (shipGrid == null)
                 return false;
 
-            if (!TryGetGridIndex(toGridPosition, out var toGridIndex))
+            if (!shipGrid.IsInBounds(fromGridPosition) || !shipGrid.IsInBounds(toGridPosition))
                 return false;
 
-            var moduleObject = ModuleGrid[fromGridIndex.x, fromGridIndex.y];
-            if (moduleObject == null || ModuleGrid[toGridIndex.x, toGridIndex.y] != null)
+            GameObject moduleObject = shipGrid.GetModule(fromGridPosition);
+            if (moduleObject == null || shipGrid.IsOccupied(toGridPosition))
                 return false;
 
-            ModuleGrid[fromGridIndex.x, fromGridIndex.y] = null;
+            if (!shipGrid.TryClearModule(fromGridPosition, out _))
+                return false;
 
-            if (HasAnyModule() && !HasAdjacentModule(toGridIndex))
+            if (shipGrid.HasAnyModule() && !shipGrid.HasAdjacentModule(toGridPosition))
             {
-                ModuleGrid[fromGridIndex.x, fromGridIndex.y] = moduleObject;
+                shipGrid.TrySetModule(fromGridPosition, moduleObject);
                 return false;
             }
 
-            ModuleGrid[toGridIndex.x, toGridIndex.y] = moduleObject;
+            if (!shipGrid.TrySetModule(toGridPosition, moduleObject))
+            {
+                shipGrid.TrySetModule(fromGridPosition, moduleObject);
+                return false;
+            }
+
             moduleObject.transform.localPosition = GridToLocalPosition(toGridPosition);
+            SaveLayoutToSession();
+            RefreshGridVisuals();
             return true;
+        }
+
+        private List<ModulePlacementSnapshot> CaptureCurrentLayout()
+        {
+            var layout = new List<ModulePlacementSnapshot>();
+            if (shipGrid == null)
+                return layout;
+
+            for (int x = 0; x < shipGrid.Width; x++)
+            {
+                for (int y = 0; y < shipGrid.Height; y++)
+                {
+                    Vector2Int gridPosition = shipGrid.IndexToGridPosition(x, y);
+                    GameObject moduleObject = shipGrid.GetModule(gridPosition);
+                    if (moduleObject == null)
+                        continue;
+
+                    ModuleInstance instance = moduleObject.GetComponent<ModuleInstance>();
+                    if (instance == null || instance.definition == null || string.IsNullOrWhiteSpace(instance.definition.id))
+                        continue;
+
+                    layout.Add(new ModulePlacementSnapshot
+                    {
+                        moduleId = instance.definition.id,
+                        gridPosition = gridPosition,
+                    });
+                }
+            }
+
+            return layout;
+        }
+
+        private void SaveLayoutToSession()
+        {
+            ShipBuildSessionState.SavedLayout = CaptureCurrentLayout();
+        }
+
+        private bool TryRestoreLayoutFromSession()
+        {
+            List<ModulePlacementSnapshot> layout = ShipBuildSessionState.SavedLayout;
+            if (layout == null || layout.Count == 0)
+                return false;
+
+            foreach (var snapshot in layout)
+            {
+                if (!TryGetModuleDefinition(snapshot.moduleId, out ModuleDefinition moduleDefinition))
+                    continue;
+
+                CreateModule(moduleDefinition, snapshot.gridPosition);
+            }
+
+            return true;
+        }
+
+        private void SpawnStarterShip()
+        {
+            if (TryGetModuleDefinition("BASIC_CLAW", out ModuleDefinition claw))
+                PlaceModule(claw, Vector2Int.up);
+
+            if (TryGetModuleDefinition("BASIC_CORE", out ModuleDefinition core))
+                PlaceModule(core, Vector2Int.zero);
+
+            if (TryGetModuleDefinition("BASIC_ENGINE", out ModuleDefinition engineLeft))
+                PlaceModule(engineLeft, Vector2Int.left);
+
+            if (TryGetModuleDefinition("BASIC_ENGINE", out ModuleDefinition engineRight))
+                PlaceModule(engineRight, Vector2Int.right);
+        }
+
+        private void OnDisable()
+        {
+            StopBuilderRuntimeBehaviors();
+            SaveLayoutToSession();
+        }
+
+        private void OnEnable()
+        {
+            if (!isBuilderMode)
+            {
+                SetGridVisibility(false);
+                return;
+            }
+
+            ClearAsteroidsFromBuildScene();
+            SetGridVisibility(true);
+            RefreshGridVisuals();
+        }
+
+        private void StopBuilderRuntimeBehaviors()
+        {
+            ModuleInstance[] moduleInstances = GetComponentsInChildren<ModuleInstance>(true);
+            foreach (var moduleInstance in moduleInstances)
+            {
+                moduleInstance.Deactivate();
+                moduleInstance.enabled = false;
+            }
+        }
+
+        private void ClearAsteroidsFromBuildScene()
+        {
+            asteroid[] asteroids = FindObjectsByType<asteroid>(FindObjectsInactive.Exclude);
+            foreach (var asteroidObject in asteroids)
+            {
+                if (asteroidObject != null)
+                    Destroy(asteroidObject.gameObject);
+            }
         }
 
         private void Awake()
         {
-            ModuleStorage = new Dictionary<string, ModuleDefinition>();
+            horizontalGridTiles = Mathf.Max(1, horizontalGridTiles);
+            verticalGridTiles = Mathf.Max(1, verticalGridTiles);
+            cellSize = Mathf.Max(0.1f, cellSize);
+            isBuilderMode = GetComponent<global::BuilderController>() != null;
+
+            shipGrid = new ShipGrid(horizontalGridTiles, verticalGridTiles);
+            moduleStorage = new Dictionary<string, ModuleDefinition>();
+            gridRenderer = new ShipGridRenderer(transform, GridVisualDepthOffset, GridSortingOrder);
 
             foreach (var module in Resources.LoadAll<ModuleDefinition>("ModuleData"))
             {
-                if (module == null)
+                if (!module)
                     continue;
 
                 if (string.IsNullOrWhiteSpace(module.id))
@@ -323,38 +364,58 @@ namespace Modules
                     continue;
                 }
 
-                if (module.prefab == null)
+                if (!module.prefab)
                 {
                     Debug.LogWarning($"Module '{module.id}' has no prefab assigned.");
                     continue;
                 }
 
-                if (ModuleStorage.ContainsKey(module.id))
+                if (moduleStorage.ContainsKey(module.id))
                 {
                     Debug.LogWarning($"Duplicate module id found: '{module.id}'.");
                     continue;
                 }
 
-                ModuleStorage.Add(module.id, module);
+                moduleStorage.Add(module.id, module);
             }
 
-            Debug.Log($"Loaded {ModuleStorage.Count} module definitions.");
+            if (isBuilderMode)
+                gridRenderer.Rebuild(shipGrid, cellSize, gridOriginOffset, EmptyCellColor);
+
+            Debug.Log($"Loaded {moduleStorage.Count} module definitions.");
         }
 
         private void Start()
         {
-            // The starter ship is fixed so the building scene begins with a clear shape.
-            if (TryGetModuleDefinition("BASIC_CLAW", out var claw))
-                PlaceModule(claw, Vector2Int.up);
+            if (TryRestoreLayoutFromSession())
+            {
+                SetGridVisibility(isBuilderMode);
+                RefreshGridVisuals();
+                return;
+            }
 
-            if (TryGetModuleDefinition("BASIC_CORE", out var core))
-                PlaceModule(core, Vector2Int.zero);
+            SpawnStarterShip();
+            SetGridVisibility(isBuilderMode);
+            RefreshGridVisuals();
+        }
 
-            if (TryGetModuleDefinition("BASIC_ENGINE", out var engineLeft))
-                PlaceModule(engineLeft, Vector2Int.left);
+        private void RefreshGridVisuals()
+        {
+            if (shipGrid == null || gridRenderer == null)
+                return;
 
-            if (TryGetModuleDefinition("BASIC_ENGINE", out var engineRight))
-                PlaceModule(engineRight, Vector2Int.right);
+            if (!isBuilderMode)
+            {
+                SetGridVisibility(false);
+                return;
+            }
+
+            gridRenderer.Refresh(shipGrid, EmptyCellColor, OccupiedCellColor);
+        }
+
+        private void SetGridVisibility(bool isVisible)
+        {
+            gridRenderer?.SetVisible(isVisible);
         }
     }
 }

@@ -4,6 +4,14 @@ using UnityEngine.EventSystems;
 
 public class BuilderController : MonoBehaviour
 {
+    private static readonly ModuleCategory[] BuildableCategories =
+    {
+        ModuleCategory.Generator,
+        ModuleCategory.Converter,
+        ModuleCategory.Engine,
+        ModuleCategory.Claw,
+    };
+
     [Header("References")]
     [SerializeField] private ShipModuleBuilder shipModuleBuilder;
     [SerializeField] private UIController uiController;
@@ -17,7 +25,6 @@ public class BuilderController : MonoBehaviour
     [Header("No-UI Fallback")]
     [SerializeField] private bool enableKeyboardModuleSelection = true;
     [SerializeField] private string moduleResourcePath = "ModuleData";
-    [SerializeField] private bool blockClicksWhenPointerOverUI = false;
 
     private ModuleDefinition selectedModule;
     private ModuleDefinition[] fallbackModules = System.Array.Empty<ModuleDefinition>();
@@ -64,11 +71,6 @@ public class BuilderController : MonoBehaviour
             Debug.Log("Move mode enabled. Click source module, then destination.");
         }
 
-        if (blockClicksWhenPointerOverUI
-            && EventSystem.current != null
-            && EventSystem.current.IsPointerOverGameObject())
-            return;
-
         if (Input.GetMouseButtonDown(1))
         {
             TryRemoveAtCursor();
@@ -81,7 +83,7 @@ public class BuilderController : MonoBehaviour
 
     private void LoadFallbackModules()
     {
-        fallbackModules = Resources.LoadAll<ModuleDefinition>(moduleResourcePath);
+        fallbackModules = LoadBuildableModules();
 
         if (fallbackModules.Length == 0)
         {
@@ -91,6 +93,44 @@ public class BuilderController : MonoBehaviour
 
         if (selectedModule == null)
             SelectModuleByIndex(0);
+    }
+
+    private ModuleDefinition[] LoadBuildableModules()
+    {
+        var loadedModules = Resources.LoadAll<ModuleDefinition>(moduleResourcePath);
+        var buildableModules = new System.Collections.Generic.List<ModuleDefinition>();
+
+        foreach (var module in loadedModules)
+        {
+            if (module == null || module.prefab == null)
+                continue;
+
+            if (string.Equals(module.id, "BASIC_CORE", System.StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (string.Equals(module.id, "BASIC_BLOCK", System.StringComparison.OrdinalIgnoreCase))
+            {
+                buildableModules.Add(module);
+                continue;
+            }
+
+            bool categoryAllowed = false;
+            foreach (var allowedCategory in BuildableCategories)
+            {
+                if (module.category != allowedCategory)
+                    continue;
+
+                categoryAllowed = true;
+                break;
+            }
+
+            if (!categoryAllowed)
+                continue;
+
+            buildableModules.Add(module);
+        }
+
+        return buildableModules.ToArray();
     }
 
     private void HandleModuleSelectionInput()
@@ -139,7 +179,7 @@ public class BuilderController : MonoBehaviour
         moveModeActive = false;
         hasMoveSource = false;
 
-        if (selectedModule == null || fallbackModules.Length == 0)
+        if (!selectedModule || fallbackModules.Length == 0)
             return;
 
         for (int i = 0; i < fallbackModules.Length; i++)
@@ -163,7 +203,7 @@ public class BuilderController : MonoBehaviour
             return;
         }
 
-        if (selectedModule != null)
+        if (selectedModule)
             shipModuleBuilder.TryPlaceModule(selectedModule, gridCell);
     }
 
@@ -201,14 +241,16 @@ public class BuilderController : MonoBehaviour
     {
         gridCell = default;
 
-        if (buildCamera == null)
+        if (!buildCamera)
+        {
             buildCamera = Camera.main;
-
-        if (buildCamera == null)
             return false;
+        }
 
         Ray mouseRay = buildCamera.ScreenPointToRay(Input.mousePosition);
-        Plane shipPlane = new Plane(shipModuleBuilder.transform.forward, shipModuleBuilder.transform.position);
+        Plane shipPlane = new Plane(
+            shipModuleBuilder.GetBuildPlaneNormalWorld(),
+            shipModuleBuilder.GetBuildPlanePointWorld());
 
         if (!shipPlane.Raycast(mouseRay, out float distance))
             return false;
