@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -27,3 +27,4 @@ public class SceneLoader : MonoBehaviour
     public void LoadShipScene() => SceneManager.LoadScene("ModuleScene");
     public void LoadAsteroidScene() => SceneManager.LoadScene("AsteroidCollectionScene");
 }
+*/
