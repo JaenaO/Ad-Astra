@@ -21,10 +21,10 @@ namespace Modules
 
         public void Rebuild(ShipGrid shipGrid, float cellSize, Vector2 gridOriginOffset, Color emptyCellColor)
         {
-            if (root != null)
+            if (root)
                 Object.Destroy(root.gameObject);
 
-            if (cellSprite == null)
+            if (!cellSprite)
                 cellSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
 
             root = new GameObject("GridVisuals").transform;

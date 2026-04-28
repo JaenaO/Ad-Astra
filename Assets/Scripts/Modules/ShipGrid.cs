@@ -60,10 +60,10 @@ namespace Modules
 
     public bool TrySetModule(Vector2Int gridPosition, GameObject moduleObject)
     {
-      if (moduleObject == null || !TryGetIndex(gridPosition, out var index))
+      if (!moduleObject || !TryGetIndex(gridPosition, out var index))
         return false;
 
-      if (modules[index.x, index.y] != null)
+      if (modules[index.x, index.y])
         return false;
 
       modules[index.x, index.y] = moduleObject;
@@ -77,7 +77,7 @@ namespace Modules
           return false;
 
       moduleObject = modules[index.x, index.y];
-      if (moduleObject == null)
+      if (!moduleObject)
         return false;
 
       modules[index.x, index.y] = null;
@@ -90,7 +90,7 @@ namespace Modules
       {
         for (int y = 0; y < Height; y++)
         {
-          if (modules[x, y] != null)
+          if (modules[x, y])
             return true;
         }
       }
@@ -109,7 +109,7 @@ namespace Modules
         if (neighbor.x < 0 || neighbor.x >= Width || neighbor.y < 0 || neighbor.y >= Height)
           continue;
 
-        if (modules[neighbor.x, neighbor.y] != null)
+        if (modules[neighbor.x, neighbor.y])
           return true;
       }
 

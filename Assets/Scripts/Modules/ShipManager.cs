@@ -23,6 +23,7 @@ namespace Modules
         private const float ModuleDepthOffset = 0f;
         private const float GridVisualDepthOffset = 0f;
         private const int GridSortingOrder = 5000;
+        private const string ModuleResourcePath = "ModuleData";
         private static readonly Color EmptyCellColor = new(0.2f, 0.8f, 1f, 0.45f);
         private static readonly Color OccupiedCellColor = new(1f, 0.75f, 0.2f, 0.6f);
 
@@ -114,10 +115,7 @@ namespace Modules
         {
             GameObject created = CreateModule(moduleDefinition, gridPosition);
             if (created != null)
-            {
-                SaveLayoutToSession();
-                RefreshGridVisuals();
-            }
+                SaveLayoutAndRefreshGridVisuals();
 
             return created;
         }
@@ -158,7 +156,7 @@ namespace Modules
                 return false;
 
             ResourceCost[] costs = moduleDefinition.costs ?? Array.Empty<ResourceCost>();
-            if (GameManager.Instance != null)
+            if (GameManager.Instance)
             {
                 foreach (var cost in costs)
                     GameManager.Instance.Spend(cost.tier, cost.amount);
@@ -168,8 +166,7 @@ namespace Modules
             if (created == null)
                 return false;
 
-            SaveLayoutToSession();
-            RefreshGridVisuals();
+            SaveLayoutAndRefreshGridVisuals();
             return true;
         }
 
@@ -195,8 +192,7 @@ namespace Modules
                 CurrentEngines = Mathf.Max(0, CurrentEngines - 1);
 
             Destroy(moduleObject);
-            SaveLayoutToSession();
-            RefreshGridVisuals();
+            SaveLayoutAndRefreshGridVisuals();
             return true;
         }
 
@@ -212,7 +208,7 @@ namespace Modules
                 return false;
 
             GameObject moduleObject = shipGrid.GetModule(fromGridPosition);
-            if (moduleObject == null || shipGrid.IsOccupied(toGridPosition))
+            if (!moduleObject || shipGrid.IsOccupied(toGridPosition))
                 return false;
 
             if (!shipGrid.TryClearModule(fromGridPosition, out _))
@@ -231,8 +227,7 @@ namespace Modules
             }
 
             moduleObject.transform.localPosition = GridToLocalPosition(toGridPosition);
-            SaveLayoutToSession();
-            RefreshGridVisuals();
+            SaveLayoutAndRefreshGridVisuals();
             return true;
         }
 
@@ -248,11 +243,11 @@ namespace Modules
                 {
                     Vector2Int gridPosition = shipGrid.IndexToGridPosition(x, y);
                     GameObject moduleObject = shipGrid.GetModule(gridPosition);
-                    if (moduleObject == null)
+                    if (!moduleObject)
                         continue;
 
                     ModuleInstance instance = moduleObject.GetComponent<ModuleInstance>();
-                    if (instance == null || instance.definition == null || string.IsNullOrWhiteSpace(instance.definition.id))
+                    if (!instance || !instance.definition || string.IsNullOrWhiteSpace(instance.definition.id))
                         continue;
 
                     layout.Add(new ModulePlacementSnapshot
@@ -271,6 +266,12 @@ namespace Modules
             ShipBuildSessionState.SavedLayout = CaptureCurrentLayout();
         }
 
+        private void SaveLayoutAndRefreshGridVisuals()
+        {
+            SaveLayoutToSession();
+            RefreshGridVisuals();
+        }
+
         private bool TryRestoreLayoutFromSession()
         {
             List<ModulePlacementSnapshot> layout = ShipBuildSessionState.SavedLayout;
@@ -279,7 +280,7 @@ namespace Modules
 
             foreach (var snapshot in layout)
             {
-                if (!TryGetModuleDefinition(snapshot.moduleId, out ModuleDefinition moduleDefinition))
+                    if (!TryGetModuleDefinition(snapshot.moduleId, out ModuleDefinition moduleDefinition))
                     continue;
 
                 CreateModule(moduleDefinition, snapshot.gridPosition);
@@ -337,7 +338,7 @@ namespace Modules
             asteroid[] asteroids = FindObjectsByType<asteroid>(FindObjectsInactive.Exclude);
             foreach (var asteroidObject in asteroids)
             {
-                if (asteroidObject != null)
+                if (asteroidObject)
                     Destroy(asteroidObject.gameObject);
             }
         }
@@ -353,7 +354,7 @@ namespace Modules
             moduleStorage = new Dictionary<string, ModuleDefinition>();
             gridRenderer = new ShipGridRenderer(transform, GridVisualDepthOffset, GridSortingOrder);
 
-            foreach (var module in Resources.LoadAll<ModuleDefinition>("ModuleData"))
+            foreach (var module in ModuleCatalog.LoadModules(ModuleResourcePath))
             {
                 if (!module)
                     continue;
@@ -387,14 +388,9 @@ namespace Modules
 
         private void Start()
         {
-            if (TryRestoreLayoutFromSession())
-            {
-                SetGridVisibility(isBuilderMode);
-                RefreshGridVisuals();
-                return;
-            }
+            if (!TryRestoreLayoutFromSession())
+                SpawnStarterShip();
 
-            SpawnStarterShip();
             SetGridVisibility(isBuilderMode);
             RefreshGridVisuals();
         }

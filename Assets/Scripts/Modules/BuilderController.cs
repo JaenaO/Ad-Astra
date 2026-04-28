@@ -4,14 +4,6 @@ using UnityEngine.EventSystems;
 
 public class BuilderController : MonoBehaviour
 {
-    private static readonly ModuleCategory[] BuildableCategories =
-    {
-        ModuleCategory.Generator,
-        ModuleCategory.Converter,
-        ModuleCategory.Engine,
-        ModuleCategory.Claw,
-    };
-
     [Header("References")]
     [SerializeField] private ShipModuleBuilder shipModuleBuilder;
     [SerializeField] private UIController uiController;
@@ -36,10 +28,10 @@ public class BuilderController : MonoBehaviour
 
     private void Awake()
     {
-        if (shipModuleBuilder == null)
+        if (!shipModuleBuilder)
             shipModuleBuilder = GetComponent<ShipModuleBuilder>();
 
-        if (buildCamera == null)
+        if (!buildCamera)
             buildCamera = Camera.main;
 
         LoadFallbackModules();
@@ -47,19 +39,19 @@ public class BuilderController : MonoBehaviour
 
     private void OnEnable()
     {
-        if (uiController != null)
+        if (uiController)
             uiController.OnModuleSelected += HandleModuleSelected;
     }
 
     private void OnDisable()
     {
-        if (uiController != null)
+        if (uiController)
             uiController.OnModuleSelected -= HandleModuleSelected;
     }
 
     private void Update()
     {
-        if (shipModuleBuilder == null)
+        if (!shipModuleBuilder)
             return;
 
         HandleModuleSelectionInput();
@@ -83,7 +75,7 @@ public class BuilderController : MonoBehaviour
 
     private void LoadFallbackModules()
     {
-        fallbackModules = LoadBuildableModules();
+        fallbackModules = ModuleCatalog.LoadBuildableModules(moduleResourcePath);
 
         if (fallbackModules.Length == 0)
         {
@@ -91,46 +83,8 @@ public class BuilderController : MonoBehaviour
             return;
         }
 
-        if (selectedModule == null)
+        if (!selectedModule)
             SelectModuleByIndex(0);
-    }
-
-    private ModuleDefinition[] LoadBuildableModules()
-    {
-        var loadedModules = Resources.LoadAll<ModuleDefinition>(moduleResourcePath);
-        var buildableModules = new System.Collections.Generic.List<ModuleDefinition>();
-
-        foreach (var module in loadedModules)
-        {
-            if (module == null || module.prefab == null)
-                continue;
-
-            if (string.Equals(module.id, "BASIC_CORE", System.StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (string.Equals(module.id, "BASIC_BLOCK", System.StringComparison.OrdinalIgnoreCase))
-            {
-                buildableModules.Add(module);
-                continue;
-            }
-
-            bool categoryAllowed = false;
-            foreach (var allowedCategory in BuildableCategories)
-            {
-                if (module.category != allowedCategory)
-                    continue;
-
-                categoryAllowed = true;
-                break;
-            }
-
-            if (!categoryAllowed)
-                continue;
-
-            buildableModules.Add(module);
-        }
-
-        return buildableModules.ToArray();
     }
 
     private void HandleModuleSelectionInput()
@@ -163,8 +117,7 @@ public class BuilderController : MonoBehaviour
         selectedModuleIndex = index;
         selectedModule = fallbackModules[index];
 
-        moveModeActive = false;
-        hasMoveSource = false;
+        ResetMoveSelectionState();
 
         string moduleName = string.IsNullOrWhiteSpace(selectedModule.moduleName)
             ? selectedModule.name
@@ -176,8 +129,7 @@ public class BuilderController : MonoBehaviour
     private void HandleModuleSelected(ModuleDefinition moduleDefinition)
     {
         selectedModule = moduleDefinition;
-        moveModeActive = false;
-        hasMoveSource = false;
+        ResetMoveSelectionState();
 
         if (!selectedModule || fallbackModules.Length == 0)
             return;
@@ -211,7 +163,7 @@ public class BuilderController : MonoBehaviour
     {
         if (!hasMoveSource)
         {
-            if (shipModuleBuilder.GetModuleAt(clickedCell) == null)
+            if (!shipModuleBuilder.GetModuleAt(clickedCell))
                 return;
 
             moveSourceCell = clickedCell;
@@ -225,6 +177,11 @@ public class BuilderController : MonoBehaviour
             ? $"Moved module: {moveSourceCell} -> {clickedCell}"
             : $"Move failed: {moveSourceCell} -> {clickedCell}");
 
+        ResetMoveSelectionState();
+    }
+
+    private void ResetMoveSelectionState()
+    {
         moveModeActive = false;
         hasMoveSource = false;
     }

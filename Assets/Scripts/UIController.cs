@@ -6,13 +6,7 @@ using TMPro;
 
 public class UIController : MonoBehaviour
 {
-    private static readonly ModuleCategory[] BuildableCategories =
-    {
-        ModuleCategory.Generator,
-        ModuleCategory.Converter,
-        ModuleCategory.Engine,
-        ModuleCategory.Claw,
-    };
+    private const string ModuleResourcePath = "ModuleData";
 
     // Keep existing road placement
     public Action OnRoadPlacement;
@@ -32,7 +26,7 @@ public class UIController : MonoBehaviour
 
     private void Start()
     {
-        if (placeRoadButton != null)
+        if (placeRoadButton)
         {
             buttonList.Add(placeRoadButton);
 
@@ -53,14 +47,14 @@ public class UIController : MonoBehaviour
 
     void BuildModuleButtons()
     {
-        if (moduleButtonPrefab == null || moduleButtonContainer == null)
+        if (!moduleButtonPrefab || !moduleButtonContainer)
         {
             Debug.LogWarning("UIController: Module button prefab/container is not assigned.");
             return;
         }
 
         // Load buildable modules from Resources automatically.
-        availableModules = LoadBuildableModules();
+        availableModules = ModuleCatalog.LoadBuildableModules(ModuleResourcePath);
 
         foreach (var module in availableModules)
         {
@@ -68,13 +62,13 @@ public class UIController : MonoBehaviour
             var btn = btnObj.GetComponent<Button>();
             var label = btnObj.GetComponentInChildren<TMP_Text>();
 
-            if (btn == null || label == null)
+            if (!btn || !label)
             {
                 Debug.LogWarning("UIController: Module button prefab must contain Button and TMP_Text.");
                 continue;
             }
 
-            if (label.font == null && TMP_Settings.defaultFontAsset != null)
+            if (!label.font && TMP_Settings.defaultFontAsset)
                 label.font = TMP_Settings.defaultFontAsset;
 
             label.text = FormatLabel(module);
@@ -89,61 +83,40 @@ public class UIController : MonoBehaviour
 
             buttonList.Add(btn);
         }
-    }
-
-    private ModuleDefinition[] LoadBuildableModules()
-    {
-        var loadedModules = Resources.LoadAll<ModuleDefinition>("ModuleData");
-        var buildableModules = new List<ModuleDefinition>();
-
-        foreach (var module in loadedModules)
-        {
-            if (module == null || module.prefab == null)
-                continue;
-
-            if (string.Equals(module.id, "BASIC_CORE", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (string.Equals(module.id, "BASIC_BLOCK", StringComparison.OrdinalIgnoreCase))
-            {
-                buildableModules.Add(module);
-                continue;
-            }
-
-            bool categoryAllowed = false;
-            foreach (var allowedCategory in BuildableCategories)
-            {
-                if (module.category != allowedCategory)
-                    continue;
-
-                categoryAllowed = true;
-                break;
-            }
-
-            if (!categoryAllowed)
-                continue;
-
-            buildableModules.Add(module);
-        }
-
-        if (buildableModules.Count == 0)
+        if (availableModules.Length == 0)
             Debug.LogWarning("UIController: No buildable modules found in Resources/ModuleData.");
-
-        return buildableModules.ToArray();
     }
 
     string FormatLabel(ModuleDefinition mod)
     {
-        string cost = "";
-        foreach (var c in mod.costs)
-            cost += $"{c.amount} {c.tier}\n";
-        return $"{mod.moduleName}\n<size=70%>{cost.Trim()}</size>";
+        if (!mod)
+            return "Unknown Module";
+
+        string moduleName = string.IsNullOrWhiteSpace(mod.moduleName) ? mod.name : mod.moduleName;
+        ResourceCost[] costs = mod.costs ?? Array.Empty<ResourceCost>();
+
+        if (costs.Length == 0)
+            return moduleName;
+
+        var costLines = new List<string>();
+        foreach (var cost in costs)
+        {
+            if (cost == null)
+                continue;
+
+            costLines.Add($"{cost.amount} {cost.tier}");
+        }
+
+        if (costLines.Count == 0)
+            return moduleName;
+
+        return $"{moduleName}\n<size=70%>{string.Join("\n", costLines)}</size>";
     }
 
     private void ModifyOutline(Button button)
     {
         var outline = button.GetComponent<Outline>();
-        if (outline != null)
+        if (outline)
         {
             outline.effectColor = outlineColor;
             outline.enabled = true;
@@ -155,7 +128,7 @@ public class UIController : MonoBehaviour
         foreach (var button in buttonList)
         {
             var outline = button.GetComponent<Outline>();
-            if (outline != null) outline.enabled = false;
+            if (outline) outline.enabled = false;
         }
     }
 }

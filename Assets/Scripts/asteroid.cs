@@ -9,39 +9,32 @@ public class asteroid : MonoBehaviour
 
     void Start()
     {
-        rb = this.GetComponent<Rigidbody>();
-        rb.linearVelocity = new Vector3(0, -speed, 0);
+        rb = GetComponent<Rigidbody>();
+        if (rb)
+            rb.linearVelocity = new Vector3(0, -speed, 0);
+
         float depth = Mathf.Abs(Camera.main.transform.position.z);
         screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, depth));
         ApplyVisuals();
 
-        // Apply rarity visuals if data is assigned
-        if (!data)
-        {
-            foreach (var renderer in GetComponentsInChildren<Renderer>())
-            {
-                renderer.material = new Material(renderer.material);
-                renderer.material.color = data.color;
-            }
-            transform.localScale = data.scale;
-        }
-        rb.angularVelocity = Random.insideUnitSphere * 2f;
+        if (rb)
+            rb.angularVelocity = Random.insideUnitSphere * 2f;
+    }
 
-        void ApplyVisuals()
+    private void ApplyVisuals()
+    {
+        if (!data)
+            return;
+
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
         {
-            if (data != null)
-            {
-                foreach (var renderer in GetComponentsInChildren<Renderer>())
-                {
-                    // Create instance properly for URP
-                    MaterialPropertyBlock block = new MaterialPropertyBlock();
-                    renderer.GetPropertyBlock(block);
-                    block.SetColor("_BaseColor", data.color);
-                    renderer.SetPropertyBlock(block);
-                }
-                transform.localScale = data.scale;
-            }
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", data.color);
+            renderer.SetPropertyBlock(block);
         }
+
+        transform.localScale = data.scale;
     }
 
     void Update()
@@ -71,7 +64,7 @@ public class asteroid : MonoBehaviour
             bestClaw = candidate;
         }
 
-        if (bestClaw != null)
+        if (bestClaw)
             bestClaw.TryStartGrab(gameObject, data);
     }
 }
