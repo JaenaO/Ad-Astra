@@ -6,7 +6,7 @@ public class BuilderController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private ShipModuleBuilder shipModuleBuilder;
-    [SerializeField] private UIController uiController;
+    [SerializeField] private ModuleShop uiController;
     [SerializeField] private Camera buildCamera;
 
     [Header("Controls")]
@@ -142,6 +142,8 @@ public class BuilderController : MonoBehaviour
                 break;
             }
         }
+        
+        Debug.Log($"Selected module [{selectedModuleIndex + 1}/{fallbackModules.Length}]: {moduleDefinition.moduleName}");
     }
 
     private void HandlePrimaryClick()

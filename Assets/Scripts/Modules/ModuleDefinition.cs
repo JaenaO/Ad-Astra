@@ -15,6 +15,9 @@ public class ModuleDefinition : ScriptableObject
     [Header("Identity")]
     public string id;           // e.g. "BASIC_ENGINE" — must match ShipManager strings
     public string moduleName;
+    public Sprite icon;
+    [TextArea] public string description;
+    
     public GameObject prefab;   // the 3D prefab to place on the grid
     public ModuleCategory category;
     public ModuleDefinition[] prerequisites;

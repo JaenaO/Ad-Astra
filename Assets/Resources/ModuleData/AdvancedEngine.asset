@@ -10,21 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
-  m_Name: BasicClaw
+  m_Name: AdvancedEngine
   m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
-  id: BASIC_CLAW
-  moduleName: Basic claw
-  icon: {fileID: 21300000, guid: 521fe920901108a43b5fd2ea540d620b, type: 3}
-  description: 'A basic claw which grabs and breaksdown astroids into useable components.
+  id: ADVANCED_ENGINE
+  moduleName: Advanced engine
+  icon: {fileID: 21300000, guid: f562f4cca11bc0c47b59dc621c90a79f, type: 3}
+  description: 'A refinement of the previous chemical engine using more advanced
+    nossles and propelents.
 
-    Collects
-    astroids'
-  prefab: {fileID: 3554229377866931639, guid: c0030a7aa58084923866f452c9b69516, type: 3}
-  category: 3
+    +4 Max Weight Capacity'
+  prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
+  category: 0
   prerequisites: []
-  costs: []
+  costs:
+  - tier: 0
+    amount: 500
+  - tier: 1
+    amount: 30
+  - tier: 2
+    amount: 5
   weightCost: 0
-  maxWeightBonus: 0
+  maxWeightBonus: 4
   passiveAD: 0
   passiveSC: 0
   passiveF: 0
@@ -36,7 +42,7 @@ MonoBehaviour:
   convertToAmount: 0
   convertInterval: 0
   convertSpeedMultiplier: 1
-  clawsUnlocked: 1
+  clawsUnlocked: 0
   cooldownReduction: 0
   luckBonus: 0
   yieldRangeBonus: 0

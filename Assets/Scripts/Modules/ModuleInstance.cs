@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
@@ -10,7 +11,6 @@ public class ModuleInstance : MonoBehaviour
     {
         if (isRunning) return;
         isRunning = true;
-
         switch (definition.category)
         {
             case ModuleCategory.Generator:

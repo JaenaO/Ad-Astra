@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Modules
 {
@@ -104,9 +105,13 @@ namespace Modules
             if (moduleDefinition.category == ModuleCategory.Engine)
                 CurrentEngines += 1;
 
-            ModuleInstance instance = newModule.AddComponent<ModuleInstance>();
-            instance.definition = moduleDefinition;
-            instance.enabled = false;
+            var instanceComponent = newModule.AddComponent<ModuleInstance>();
+            instanceComponent.definition = moduleDefinition;
+            if (!isBuilderMode)
+            {
+                instanceComponent.enabled = true;
+                instanceComponent.Activate();
+            }
 
             return newModule;
         }

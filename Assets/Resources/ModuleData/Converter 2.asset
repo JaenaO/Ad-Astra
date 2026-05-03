@@ -10,26 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
-  m_Name: BasicBlock
-  m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
-  id: BASIC_BLOCK
-  moduleName: 
-  prefab: {fileID: 9192071855795361171, guid: 9b06c0aa091123b4887680a022bca02d, type: 3}
-  category: 0
+  m_Name: Converter 2
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleDefinition
+  id: LEVEL_TWO_CONVERTER
+  moduleName: Level 2 Converter
+  icon: {fileID: 21300000, guid: 9c2b44e5a2744c541a5e781dd23eb1c5, type: 3}
+  description: "A converter which compresses astroid dust into Space Crystals with
+    high presure.\n10 AD \u2192 1 SC / 25s"
+  prefab: {fileID: 9192071855795361171, guid: 9648b5eae37e5004ab22395a63e801e5, type: 3}
+  category: 2
   prerequisites: []
   costs: []
-  weightCost: 1
+  weightCost: 2
   maxWeightBonus: 0
   passiveAD: 0
   passiveSC: 0
   passiveF: 0
   passiveN: 0
   tickInterval: 0
-  convertFrom: 0
-  convertFromAmount: 0
-  convertTo: 0
-  convertToAmount: 0
-  convertInterval: 0
+  convertFrom: 1
+  convertFromAmount: 10
+  convertTo: 2
+  convertToAmount: 5
+  convertInterval: 30
   convertSpeedMultiplier: 1
   clawsUnlocked: 0
   cooldownReduction: 0

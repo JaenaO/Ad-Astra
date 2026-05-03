@@ -10,21 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
-  m_Name: BasicEngine 1
-  m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
-  id: ENGINE_ONE
-  moduleName: Upgraded engine
-  prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
-  category: 0
+  m_Name: Generator Advanced
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleDefinition
+  id: ADVANCED_GENERATOR
+  moduleName: Advanced Genertor
+  icon: {fileID: 21300000, guid: 9c2b44e5a2744c541a5e781dd23eb1c5, type: 3}
+  description: 'An upgrade of the previous design which farther refines gathered
+    material into crystals.
+
+    +5 AD +2 SC / 15s'
+  prefab: {fileID: 9192071855795361171, guid: 9648b5eae37e5004ab22395a63e801e5, type: 3}
+  category: 1
   prerequisites: []
-  costs: []
-  weightCost: 0
+  costs:
+  - tier: 0
+    amount: 100
+  - tier: 1
+    amount: 25
+  weightCost: 2
   maxWeightBonus: 0
-  passiveAD: 0
-  passiveSC: 0
+  passiveAD: 5
+  passiveSC: 2
   passiveF: 0
   passiveN: 0
-  tickInterval: 0
+  tickInterval: 15
   convertFrom: 0
   convertFromAmount: 0
   convertTo: 0

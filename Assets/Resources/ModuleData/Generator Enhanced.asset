@@ -10,30 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf43be7599e121748b9d6586ed4e7f5d, type: 3}
-  m_Name: BasicEngine
-  m_EditorClassIdentifier: Assembly-CSharp::Modules.ModuleDefinition
-  id: BASIC_ENGINE
-  moduleName: Basic engine
-  icon: {fileID: 21300000, guid: f562f4cca11bc0c47b59dc621c90a79f, type: 3}
-  description: 'A basic chemical engine which allows the ship to lift move across
-    space.
+  m_Name: Generator Enhanced
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleDefinition
+  id: ENHANCED_GENERATOR
+  moduleName: Enhanced Genertor
+  icon: {fileID: 21300000, guid: 9c2b44e5a2744c541a5e781dd23eb1c5, type: 3}
+  description: 'A total redesign of the generators to squeze out more efficency from
+    refining.
 
-    +2 Max Weight Capacity'
-  prefab: {fileID: 9192071855795361171, guid: 3278462430957f841907ca5e5bf7bb6d, type: 3}
-  category: 0
+    +10 AD +5 SC +2 F / 20s'
+  prefab: {fileID: 9192071855795361171, guid: 9648b5eae37e5004ab22395a63e801e5, type: 3}
+  category: 1
   prerequisites: []
   costs:
   - tier: 0
-    amount: 300
+    amount: 500
   - tier: 1
-    amount: 10
-  weightCost: 0
-  maxWeightBonus: 2
-  passiveAD: 0
-  passiveSC: 0
-  passiveF: 0
+    amount: 75
+  - tier: 2
+    amount: 15
+  weightCost: 3
+  maxWeightBonus: 0
+  passiveAD: 10
+  passiveSC: 5
+  passiveF: 2
   passiveN: 0
-  tickInterval: 0
+  tickInterval: 20
   convertFrom: 0
   convertFromAmount: 0
   convertTo: 0
