@@ -20,7 +20,11 @@ MonoBehaviour:
   prefab: {fileID: 9192071855795361171, guid: 9648b5eae37e5004ab22395a63e801e5, type: 3}
   category: 2
   prerequisites: []
-  costs: []
+  costs:
+  - tier: 0
+    amount: 50
+  - tier: 1
+    amount: 10
   weightCost: 2
   maxWeightBonus: 0
   passiveAD: 0

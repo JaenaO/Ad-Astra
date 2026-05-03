@@ -22,8 +22,14 @@ MonoBehaviour:
   prefab: {fileID: 3554229377866931639, guid: c0030a7aa58084923866f452c9b69516, type: 3}
   category: 3
   prerequisites: []
-  costs: []
-  weightCost: 0
+  costs:
+  - tier: 0
+    amount: 200
+  - tier: 1
+    amount: 50
+  - tier: 2
+    amount: 1
+  weightCost: 1
   maxWeightBonus: 0
   passiveAD: 0
   passiveSC: 0
